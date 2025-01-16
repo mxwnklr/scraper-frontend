@@ -15,33 +15,56 @@ export default function InputForm() {
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
-
+  
     try {
       const formData = new FormData();
       formData.append("company_url", companyUrl);
       formData.append("keywords", keywords);
       formData.append("include_ratings", includeRatings);
-
+  
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/process/",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" } // ✅ Still using blob
       );
-
-      if (response.status === 404) {
-        setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
-        setLoading(false);
-        return;
+  
+      // ✅ Convert Blob to Text to Detect Errors
+      const contentDisposition = response.headers["content-disposition"];
+  
+      if (!contentDisposition) {
+        const text = await response.data.text();
+        try {
+          const json = JSON.parse(text);
+          if (json.error) {
+            throw new Error(json.error);
+          }
+        } catch (error) {
+          throw new Error("❌ No matching reviews found.");
+        }
       }
-
+  
+      // ✅ Create a downloadable file
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("Error processing request:", error);
-      setErrorMessage("❌ Something went wrong. Please try again.");
+  
+      if (error.response) {
+        // ✅ Handle specific HTTP errors
+        if (error.response.status === 404) {
+          setErrorMessage("❌ No matching reviews found.");
+        } else if (error.response.status === 422) {
+          setErrorMessage("❌ Invalid input. Please check your entries.");
+        } else {
+          setErrorMessage("❌ Something went wrong. Please try again.");
+        }
+      } else {
+        // ✅ Handle network-related errors
+        setErrorMessage("❌ Network error. Please check your connection.");
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
