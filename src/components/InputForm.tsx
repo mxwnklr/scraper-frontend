@@ -1,100 +1,100 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { processScraping } from "@/api";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
+import axios from "axios";
 
-const InputForm: React.FC = () => {
-    const [platform, setPlatform] = useState("trustpilot");
-    const [companyUrl, setCompanyUrl] = useState("");
-    const [keywords, setKeywords] = useState("");
-    const [includeRatings, setIncludeRatings] = useState("");
-    const [downloadUrl, setDownloadUrl] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [dots, setDots] = useState("");
+export default function InputForm() {
+  const [companyUrl, setCompanyUrl] = useState("");
+  const [keywords, setKeywords] = useState("");
+  const [includeRatings, setIncludeRatings] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState("");
 
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (loading) {
-            interval = setInterval(() => {
-                setDots((prev) => (prev.length < 3 ? prev + "." : ""));
-            }, 500);
-        }
-        return () => clearInterval(interval);
-    }, [loading]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setDownloadUrl("");
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append("company_url", companyUrl);
+      formData.append("keywords", keywords);
+      formData.append("include_ratings", includeRatings);
 
-        if (!companyUrl || !keywords || !includeRatings) {
-            alert("Please fill out all fields.");
-            return;
-        }
+      const response = await axios.post(
+        "https://scraper-backend-fsrl.onrender.com/process/",
+        formData,
+        { responseType: "blob" }
+      );
 
-        setLoading(true);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      setDownloadUrl(url);
+    } catch (error) {
+      console.error("Error processing request:", error);
+    }
 
-        try {
-            const outputBlob = await processScraping(platform, companyUrl, keywords, includeRatings);  // ✅ FIXED ARGUMENTS
-            const url = window.URL.createObjectURL(new Blob([outputBlob]));
-            setDownloadUrl(url);
-        } catch (error) {
-            console.error("Error processing request:", error);
-            alert("Failed to fetch data. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    setLoading(false);
+  };
 
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4 w-full">
-            <Card className="w-[750px] max-w-full p-6 rounded-2xl bg-[#1C1C1C] text-white border border-gray-700 shadow-lg">
-                <h2 className="text-3xl font-bold mb-6">🔍 Scrape Reviews</h2>
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
+      <div className="w-full max-w-lg p-8 bg-gray-800 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-center mb-4">🔍 Scrape Trustpilot Reviews</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <select 
-                        className="w-full p-3 rounded-xl bg-[#2A2A2A] text-white border border-gray-600"
-                        value={platform}
-                        onChange={(e) => setPlatform(e.target.value)}
-                    >
-                        <option value="trustpilot">Trustpilot</option>
-                        <option value="google">Google Reviews</option>
-                    </select>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Company URL */}
+          <input
+            type="text"
+            placeholder="Company URL (use de.companyurl.com for German reviews)"
+            value={companyUrl}
+            onChange={(e) => setCompanyUrl(e.target.value)}
+            className="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-                    <input 
-                        type="text"
-                        className="w-full p-4 rounded-xl bg-[#2A2A2A] text-white border border-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="Company URL (use de.companyurl.com for German reviews)"
-                        value={companyUrl}
-                        onChange={(e) => setCompanyUrl(e.target.value)}
-                    />
-                    <input 
-                        type="text"
-                        className="w-full p-4 rounded-xl bg-[#2A2A2A] text-white border border-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="Keywords (comma-separated, no comma after last word)"
-                        value={keywords}
-                        onChange={(e) => setKeywords(e.target.value)}
-                    />
-                    <input 
-                        type="text"
-                        className="w-full p-4 rounded-xl bg-[#2A2A2A] text-white border border-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="Include Ratings (e.g., 1,2,3 ; no comma after last number)"
-                        value={includeRatings}
-                        onChange={(e) => setIncludeRatings(e.target.value)}
-                    />
+          {/* Keywords */}
+          <input
+            type="text"
+            placeholder="Keywords (comma-separated, no comma after last word)"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+            className="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-                    <button type="submit" className="button" disabled={loading}>
-                        {loading ? `Scraping${dots}` : "Start Scraping"}
-                    </button>
-                </form>
+          {/* Include Ratings */}
+          <input
+            type="text"
+            placeholder="Include Ratings (e.g., 1,2,3 ; no comma after last number)"
+            value={includeRatings}
+            onChange={(e) => setIncludeRatings(e.target.value)}
+            className="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
 
-                {downloadUrl && (
-                    <a href={downloadUrl} download="scraped_reviews.xlsx" className="block w-full mt-4 p-3 rounded-xl bg-[#2A2A2A] text-white border border-gray-600 text-center hover:bg-[#3A3A3A] transition">
-                        ⬇️ Download Scraped Data
-                    </a>
-                )}
-            </Card>
-        </div>
-    );
-};
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full p-3 bg-blue-600 rounded-md font-bold hover:bg-blue-500 transition"
+            disabled={loading}
+          >
+            {loading ? "Scraping..." : "Start Scraping"}
+          </button>
+        </form>
 
-export default InputForm;
+        {/* Download Button */}
+        {downloadUrl && (
+          <div className="mt-4 text-center">
+            <a
+              href={downloadUrl}
+              download="scraped_reviews.xlsx"
+              className="w-full block p-3 bg-green-600 rounded-md font-bold text-center hover:bg-green-500 transition"
+            >
+              ⬇️ Download Scraped Data
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
