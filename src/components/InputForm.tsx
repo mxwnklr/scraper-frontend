@@ -70,7 +70,7 @@ export default function InputForm() {
                 alt="Info"
                 className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
-              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
+              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
                 Use "de.companyurl.com" for German reviews
               </div>
             </div>
@@ -92,7 +92,7 @@ export default function InputForm() {
                 alt="Info"
                 className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
-              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
+              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
                 Separate keywords with commas, e.g. "shipping, delay, refund", no comma after last keyword
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function InputForm() {
                 alt="Info"
                 className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
-              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
+              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
                 Enter ratings like "1,2,3", no comma after last rating
               </div>
             </div>
