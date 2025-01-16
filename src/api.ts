@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://your-backend-url.onrender.com"; // Update with your actual backend URL
+const API_URL = "https://scraper-backend-fsrl.onrender.com"; // Update with your actual backend URL
 
 export const processScraping = async (platform: string, companyUrl: string, keywords: string, includeRatings: string) => {
     const formData = new FormData();
