@@ -25,42 +25,36 @@ export default function InputForm() {
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/process/",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" } // ✅ Still using blob
+        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
       );
   
-      // ✅ Convert Blob to Text to Detect Errors
-      const contentDisposition = response.headers["content-disposition"];
-  
-      if (!contentDisposition) {
-        const text = await response.data.text();
-        try {
-          const json = JSON.parse(text);
-          if (json.error) {
-            throw new Error(json.error);
+      // ✅ Detect if response is an error (JSON instead of a file)
+      if (response.headers["content-type"].includes("application/json")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const json = JSON.parse(reader.result as string);
+            setErrorMessage(json.error || "❌ No matching reviews found.");
+          } catch (err) {
+            setErrorMessage("❌ Unknown error occurred.");
           }
-        } catch (error) {
-          throw new Error("❌ No matching reviews found.");
-        }
+        };
+        reader.readAsText(response.data);
+        return;
       }
   
-      // ✅ Create a downloadable file
+      // ✅ If response is a valid file, create a download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("Error processing request:", error);
   
-      if (error.response) {
-        // ✅ Handle specific HTTP errors
-        if (error.response.status === 404) {
-          setErrorMessage("❌ No matching reviews found.");
-        } else if (error.response.status === 422) {
-          setErrorMessage("❌ Invalid input. Please check your entries.");
-        } else {
-          setErrorMessage("❌ Something went wrong. Please try again.");
-        }
+      if (error.response?.status === 404) {
+        setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
+      } else if (error.response?.status === 422) {
+        setErrorMessage("❌ Invalid input. Please check your entries.");
       } else {
-        // ✅ Handle network-related errors
-        setErrorMessage("❌ Network error. Please check your connection.");
+        setErrorMessage("❌ Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
