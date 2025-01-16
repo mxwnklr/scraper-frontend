@@ -37,10 +37,14 @@ export default function InputForm() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white">
-      <div className="w-full max-w-lg p-8 bg-gray-800 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-4">🔍 Scrape Trustpilot Reviews</h2>
+    <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
+      <div className="w-full max-w-md md:max-w-lg p-8 bg-[#1a1a1a] rounded-xl shadow-lg border border-gray-700">
+        {/* Header */}
+        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
+          <span className="mr-2">🔍</span> Scrape Trustpilot Reviews
+        </h2>
 
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Company URL */}
           <input
@@ -48,7 +52,7 @@ export default function InputForm() {
             placeholder="Company URL (use de.companyurl.com for German reviews)"
             value={companyUrl}
             onChange={(e) => setCompanyUrl(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 bg-[#262626] rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
 
@@ -58,7 +62,7 @@ export default function InputForm() {
             placeholder="Keywords (comma-separated, no comma after last word)"
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 bg-[#262626] rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
 
@@ -68,7 +72,7 @@ export default function InputForm() {
             placeholder="Include Ratings (e.g., 1,2,3 ; no comma after last number)"
             value={includeRatings}
             onChange={(e) => setIncludeRatings(e.target.value)}
-            className="w-full p-3 bg-gray-700 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 bg-[#262626] rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
 
@@ -84,13 +88,13 @@ export default function InputForm() {
 
         {/* Download Button */}
         {downloadUrl && (
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <a
               href={downloadUrl}
               download="scraped_reviews.xlsx"
               className="w-full block p-3 bg-green-600 rounded-md font-bold text-center hover:bg-green-500 transition"
             >
-              ⬇️ Download Scraped Data
+              📥 Download Scraped Data
             </a>
           </div>
         )}
