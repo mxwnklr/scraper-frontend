@@ -46,8 +46,8 @@ const InputForm: React.FC = () => {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4">
-            <Card className="card">
+        <div className="flex flex-col items-center justify-center min-h-screen px-4 w-full">
+            <Card className="w-[500px] max-w-full p-6 rounded-xl bg-[#1C1C1C] text-white border border-gray-700 shadow-lg">
                 <h2 className="text-3xl font-bold mb-6">🔍 Scrape Reviews</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -62,18 +62,21 @@ const InputForm: React.FC = () => {
 
                     <input 
                         type="text"
+                        className="w-full p-3 rounded-lg bg-[#2A2A2A] text-white border border-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         placeholder="Company URL (use de.companyurl.com for German reviews)"
                         value={companyUrl}
                         onChange={(e) => setCompanyUrl(e.target.value)}
                     />
                     <input 
                         type="text"
+                        className="w-full p-3 rounded-lg bg-[#2A2A2A] text-white border border-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         placeholder="Keywords (comma-separated, no comma after last word)"
                         value={keywords}
                         onChange={(e) => setKeywords(e.target.value)}
                     />
                     <input 
                         type="text"
+                        className="w-full p-3 rounded-lg bg-[#2A2A2A] text-white border border-gray-600 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         placeholder="Include Ratings (e.g., 1,2,3 ; no comma after last number)"
                         value={includeRatings}
                         onChange={(e) => setIncludeRatings(e.target.value)}
