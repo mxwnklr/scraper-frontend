@@ -17,32 +17,32 @@ export default function InputForm() {
     setErrorMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("company_url", companyUrl);
-      formData.append("keywords", keywords);
-      formData.append("include_ratings", includeRatings);
+        const formData = new FormData();
+        formData.append("company_url", companyUrl);
+        formData.append("keywords", keywords);
+        formData.append("include_ratings", includeRatings);
 
-      const response = await axios.post(
-        "https://scraper-backend-fsrl.onrender.com/process/",
-        formData,
-        { responseType: "blob" }
-      );
+        const response = await axios.post(
+            "https://scraper-backend-fsrl.onrender.com/process/",
+            formData, 
+            { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+        );
 
-      if (response.status === 404) {
-        setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
-        setLoading(false);
-        return;
-      }
+        if (response.status === 404) {
+            setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
+            setLoading(false);
+            return;
+        }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      setDownloadUrl(url);
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        setDownloadUrl(url);
     } catch (error: any) {
-      console.error("Error processing request:", error);
-      setErrorMessage("❌ Something went wrong. Please try again.");
+        console.error("Error processing request:", error);
+        setErrorMessage("❌ Something went wrong. Please try again.");
     }
 
     setLoading(false);
-  };
+};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
