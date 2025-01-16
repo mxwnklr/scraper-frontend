@@ -55,66 +55,66 @@ export default function InputForm() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Company URL */}
-          <div className="relative flex items-center">
+          <div className="relative">
             <input
               type="text"
               placeholder="URL"
               value={companyUrl}
               onChange={(e) => setCompanyUrl(e.target.value)}
-              className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="ml-3 relative group">
+            <div className="absolute right-4 top-4 group">
               <img
                 src="/info-icon.svg"
                 alt="Info"
-                className="w-5 h-5 cursor-pointer"
+                className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
-              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg transition-opacity duration-300">
+              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
                 Use `de.companyurl.com` for German reviews.
               </div>
             </div>
           </div>
 
           {/* Keywords */}
-          <div className="relative flex items-center">
+          <div className="relative">
             <input
               type="text"
               placeholder="Keywords"
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
-              className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="ml-3 relative group">
+            <div className="absolute right-4 top-4 group">
               <img
                 src="/info-icon.svg"
                 alt="Info"
-                className="w-5 h-5 cursor-pointer"
+                className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
-              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg transition-opacity duration-300">
+              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
                 Separate keywords with commas, e.g., `shipping, delay, refund`.
               </div>
             </div>
           </div>
 
           {/* Include Ratings */}
-          <div className="relative flex items-center">
+          <div className="relative">
             <input
               type="text"
               placeholder="Rating"
               value={includeRatings}
               onChange={(e) => setIncludeRatings(e.target.value)}
-              className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="ml-3 relative group">
+            <div className="absolute right-4 top-4 group">
               <img
                 src="/info-icon.svg"
                 alt="Info"
-                className="w-5 h-5 cursor-pointer"
+                className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
-              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg transition-opacity duration-300">
+              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
                 Enter ratings like `1,2,3` without spaces.
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function InputForm() {
               download="scraped_reviews.xlsx"
               className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              📥 Download Scraped Data
+              ⬇️ Download Scraped Data
             </a>
           </div>
         )}
