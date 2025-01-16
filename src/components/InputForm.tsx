@@ -15,34 +15,32 @@ export default function InputForm() {
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
-  
+
     try {
       const formData = new FormData();
       formData.append("company_url", companyUrl);
       formData.append("keywords", keywords);
       formData.append("include_ratings", includeRatings);
-  
+
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/process/",
         formData,
-        { responseType: "blob" } // ✅ Expect a file response (binary data)
+        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
       );
-  
-      if (response.headers["content-type"].includes("application/json")) {
-        const errorData = await response.data.text();
-        setErrorMessage(errorData || "❌ No matching reviews found.");
+
+      if (response.status === 404) {
+        setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
         setLoading(false);
         return;
       }
-  
-      // ✅ Create a download link
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing request:", error);
       setErrorMessage("❌ Something went wrong. Please try again.");
     }
-  
+
     setLoading(false);
   };
 
@@ -56,33 +54,61 @@ export default function InputForm() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <input
-            type="text"
-            placeholder="Company URL (use de.companyurl.com for German reviews)"
-            value={companyUrl}
-            onChange={(e) => setCompanyUrl(e.target.value)}
-            className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+          {/* Company URL */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="URL"
+              value={companyUrl}
+              onChange={(e) => setCompanyUrl(e.target.value)}
+              className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <div className="absolute right-3 top-3 cursor-pointer group">
+              <span className="text-gray-400 text-lg">ℹ️</span>
+              <div className="hidden group-hover:block absolute bg-gray-700 text-white text-sm rounded-lg p-2 w-64 right-0 top-8">
+                Use `de.companyurl.com` for German reviews.
+              </div>
+            </div>
+          </div>
 
-          <input
-            type="text"
-            placeholder="Keywords (comma-separated, no comma after last word)"
-            value={keywords}
-            onChange={(e) => setKeywords(e.target.value)}
-            className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+          {/* Keywords */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Keywords"
+              value={keywords}
+              onChange={(e) => setKeywords(e.target.value)}
+              className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <div className="absolute right-3 top-3 cursor-pointer group">
+              <span className="text-gray-400 text-lg">ℹ️</span>
+              <div className="hidden group-hover:block absolute bg-gray-700 text-white text-sm rounded-lg p-2 w-64 right-0 top-8">
+                Separate keywords with commas, e.g., `shipping, delay, refund`.
+              </div>
+            </div>
+          </div>
 
-          <input
-            type="text"
-            placeholder="Include Ratings (e.g., 1,2,3 ; no comma after last number)"
-            value={includeRatings}
-            onChange={(e) => setIncludeRatings(e.target.value)}
-            className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+          {/* Include Ratings */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Rating"
+              value={includeRatings}
+              onChange={(e) => setIncludeRatings(e.target.value)}
+              className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <div className="absolute right-3 top-3 cursor-pointer group">
+              <span className="text-gray-400 text-lg">ℹ️</span>
+              <div className="hidden group-hover:block absolute bg-gray-700 text-white text-sm rounded-lg p-2 w-64 right-0 top-8">
+                Enter ratings like `1,2,3` without spaces.
+              </div>
+            </div>
+          </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition"
