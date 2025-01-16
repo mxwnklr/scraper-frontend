@@ -46,7 +46,7 @@ export default function InputForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
-      <div className="w-full max-w-2xl p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
+      <div className="w-full max-w-[600px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
         {/* Header */}
         <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
           <span className="mr-2">🔍</span> Scrape Trustpilot Reviews
@@ -55,7 +55,7 @@ export default function InputForm() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Company URL */}
-          <div className="relative">
+          <div className="relative flex items-center">
             <input
               type="text"
               placeholder="URL"
@@ -64,16 +64,20 @@ export default function InputForm() {
               className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="absolute right-3 top-3 cursor-pointer group">
-              <span className="text-gray-400 text-lg">ℹ️</span>
-              <div className="hidden group-hover:block absolute bg-gray-700 text-white text-sm rounded-lg p-2 w-64 right-0 top-8">
+            <div className="ml-3 relative group">
+              <img
+                src="/info-icon.svg"
+                alt="Info"
+                className="w-5 h-5 cursor-pointer"
+              />
+              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg transition-opacity duration-300">
                 Use `de.companyurl.com` for German reviews.
               </div>
             </div>
           </div>
 
           {/* Keywords */}
-          <div className="relative">
+          <div className="relative flex items-center">
             <input
               type="text"
               placeholder="Keywords"
@@ -82,16 +86,20 @@ export default function InputForm() {
               className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="absolute right-3 top-3 cursor-pointer group">
-              <span className="text-gray-400 text-lg">ℹ️</span>
-              <div className="hidden group-hover:block absolute bg-gray-700 text-white text-sm rounded-lg p-2 w-64 right-0 top-8">
+            <div className="ml-3 relative group">
+              <img
+                src="/info-icon.svg"
+                alt="Info"
+                className="w-5 h-5 cursor-pointer"
+              />
+              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg transition-opacity duration-300">
                 Separate keywords with commas, e.g., `shipping, delay, refund`.
               </div>
             </div>
           </div>
 
           {/* Include Ratings */}
-          <div className="relative">
+          <div className="relative flex items-center">
             <input
               type="text"
               placeholder="Rating"
@@ -100,9 +108,13 @@ export default function InputForm() {
               className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="absolute right-3 top-3 cursor-pointer group">
-              <span className="text-gray-400 text-lg">ℹ️</span>
-              <div className="hidden group-hover:block absolute bg-gray-700 text-white text-sm rounded-lg p-2 w-64 right-0 top-8">
+            <div className="ml-3 relative group">
+              <img
+                src="/info-icon.svg"
+                alt="Info"
+                className="w-5 h-5 cursor-pointer"
+              />
+              <div className="hidden group-hover:block absolute bg-gray-800 text-white text-sm rounded-lg p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg transition-opacity duration-300">
                 Enter ratings like `1,2,3` without spaces.
               </div>
             </div>
