@@ -28,7 +28,7 @@ export default function InputForm() {
         { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
       );
   
-      // ✅ Detect if response is an error (JSON instead of a file)
+      // ✅ Check if response is JSON (error message) instead of a file
       if (response.headers["content-type"].includes("application/json")) {
         const reader = new FileReader();
         reader.onload = () => {
@@ -43,17 +43,26 @@ export default function InputForm() {
         return;
       }
   
-      // ✅ If response is a valid file, create a download link
+      // ✅ If response is a file, generate the download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("Error processing request:", error);
   
+      // ✅ Handle 404 error correctly
       if (error.response?.status === 404) {
         setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
-      } else if (error.response?.status === 422) {
+      } 
+      // ✅ Handle CORS or Network errors separately
+      else if (error.message === "Network Error") {
+        setErrorMessage("❌ Network error. Please check your connection.");
+      }
+      // ✅ Handle invalid input (422) errors
+      else if (error.response?.status === 422) {
         setErrorMessage("❌ Invalid input. Please check your entries.");
-      } else {
+      } 
+      // ✅ Generic error fallback
+      else {
         setErrorMessage("❌ Something went wrong. Please try again.");
       }
     } finally {
