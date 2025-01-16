@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Trustpilot Scraper",
-  description: "Trustpilot Review Scraper",
+  title: "Review Scraper",
+  description: "Review Scraper for Trustpilot and Google Reviews",
 };
 
 export default function RootLayout({

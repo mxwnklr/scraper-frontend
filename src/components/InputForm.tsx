@@ -62,19 +62,19 @@ const InputForm: React.FC = () => {
 
                     <input 
                         type="text"
-                        placeholder="Company URL"
+                        placeholder="Company URL (use de.companyurl.com for German reviews)"
                         value={companyUrl}
                         onChange={(e) => setCompanyUrl(e.target.value)}
                     />
                     <input 
                         type="text"
-                        placeholder="Keywords (comma-separated)"
+                        placeholder="Keywords (comma-separated, no comma after last word)"
                         value={keywords}
                         onChange={(e) => setKeywords(e.target.value)}
                     />
                     <input 
                         type="text"
-                        placeholder="Include Ratings (e.g., 1,2,3)"
+                        placeholder="Include Ratings (e.g., 1,2,3 ; no comma after last number)"
                         value={includeRatings}
                         onChange={(e) => setIncludeRatings(e.target.value)}
                     />
