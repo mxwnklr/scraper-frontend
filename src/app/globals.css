@@ -1,21 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+/* 🌙 Vercel-Inspired Gray Theme */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #121212; /* Soft dark gray */
+    --foreground: #EAEAEA; /* Light text */
+    --card-bg: #1E1E1E; /* Dark gray card */
+    --input-bg: #2A2A2A; /* Slightly lighter input fields */
+    --input-border: #3A3A3A;
+    --button-bg: #007AFF; /* Vercel blue */
+    --button-text: #FFFFFF;
+    --button-hover: #005BBB; /* Darker blue */
+    --progress-bg: #2A2A2A;
+    --progress-fill: #4CAF50; /* Green progress */
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    @apply flex items-center justify-center min-h-screen;
+  }
+
+  /* 🌑 Input Fields */
+  input {
+    background-color: var(--input-bg);
+    color: white;
+    border: 1px solid var(--input-border);
+    @apply p-3 rounded-xl w-full focus:ring-2 focus:ring-white focus:outline-none transition-all;
+  }
+
+  /* ⚡ Buttons */
+  .button {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    width: 100%;
+    display: block;
+    text-align: center;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s ease-in-out;
+  }
+
+  .button:hover {
+    background-color: var(--button-hover);
+  }
+
+  /* ⚡ Secondary Buttons */
+  .button-secondary {
+    background-color: transparent;
+    color: var(--button-bg);
+    border: 2px solid var(--button-bg);
+    width: 100%;
+    display: block;
+    text-align: center;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+  }
+
+  .button-secondary:hover {
+    background-color: var(--button-bg);
+    color: white;
+  }
+
+  /* 📦 Card Styling */
+  .card {
+    background-color: var(--card-bg);
+    @apply w-full max-w-lg p-8 shadow-lg border border-gray-700 rounded-xl text-center space-y-5;
+  }
 }
