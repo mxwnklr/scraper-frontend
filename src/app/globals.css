@@ -7,7 +7,7 @@
 /* 🌑 Dark Mode Styling */
 @layer base {
   :root {
-    --background: #121212; /* Dark gray */
+    --background: #0D0D0D; /* Dark gray */
     --foreground: #EAEAEA; /* Light text */
     --input-bg: #1E1E1E; /* Dark input background */
     --input-border: #3A3A3A;
