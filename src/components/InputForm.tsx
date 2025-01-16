@@ -9,9 +9,9 @@ export default function InputForm() {
   const [includeRatings, setIncludeRatings] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
-  const [dots, setDots] = useState(""); // Dots for animation
+  const [dots, setDots] = useState("");
 
-  // Animate the dots every 500ms
+  // Animate loading dots
   useEffect(() => {
     if (loading) {
       const interval = setInterval(() => {
@@ -19,7 +19,7 @@ export default function InputForm() {
       }, 500);
       return () => clearInterval(interval);
     } else {
-      setDots(""); // Reset dots when not loading
+      setDots("");
     }
   }, [loading]);
 
@@ -51,15 +51,16 @@ export default function InputForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#121212] text-white">
-      <div className="w-full max-w-md md:max-w-lg p-8 rounded-2xl shadow-xl border border-gray-700">
+      {/* 🔹 Wider Card */}
+      <div className="w-full max-w-xl p-10 rounded-2xl shadow-xl border border-gray-700">
         {/* Header */}
         <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
           <span className="mr-2">🔍</span> Scrape Trustpilot Reviews
         </h2>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Company URL */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Input Fields */}
           <input
             type="text"
             placeholder="Company URL (use de.companyurl.com for German reviews)"
@@ -69,7 +70,6 @@ export default function InputForm() {
             required
           />
 
-          {/* Keywords */}
           <input
             type="text"
             placeholder="Keywords (comma-separated, no comma after last word)"
@@ -79,7 +79,6 @@ export default function InputForm() {
             required
           />
 
-          {/* Include Ratings */}
           <input
             type="text"
             placeholder="Include Ratings (e.g., 1,2,3 ; no comma after last number)"
@@ -107,7 +106,7 @@ export default function InputForm() {
               download="scraped_reviews.xlsx"
               className="w-full block p-3 bg-gray-700 text-white rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              📥 Download Scraped Data
+              ⬇️ Download Scraped Data
             </a>
           </div>
         )}
