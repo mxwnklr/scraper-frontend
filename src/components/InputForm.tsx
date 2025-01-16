@@ -88,7 +88,7 @@ const InputForm: React.FC = () => {
                 </form>
 
                 {downloadUrl && (
-                    <a href={downloadUrl} download="scraped_reviews.xlsx" className="button-secondary">
+                    <a href={downloadUrl} download="scraped_reviews.xlsx" className="block w-full mt-4 p-3 rounded-xl bg-[#2A2A2A] text-white border border-gray-600 text-center hover:bg-[#3A3A3A] transition">
                         ⬇️ Download Scraped Data
                     </a>
                 )}
