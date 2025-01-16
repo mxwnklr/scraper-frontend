@@ -5,7 +5,7 @@ import { processScraping } from "@/api";
 import { Card } from "@/components/ui/card";
 
 const InputForm: React.FC = () => {
-    const [platform, setPlatform] = useState("trustpilot"); // Default selection
+    const [platform, setPlatform] = useState("trustpilot");
     const [companyUrl, setCompanyUrl] = useState("");
     const [keywords, setKeywords] = useState("");
     const [includeRatings, setIncludeRatings] = useState("");
@@ -34,7 +34,7 @@ const InputForm: React.FC = () => {
         setLoading(true);
 
         try {
-            const outputBlob = await processScraping(platform, companyUrl, keywords, includeRatings);
+            const outputBlob = await processScraping(platform, companyUrl, keywords, includeRatings);  // ✅ FIXED ARGUMENTS
             const url = window.URL.createObjectURL(new Blob([outputBlob]));
             setDownloadUrl(url);
         } catch (error) {
@@ -51,7 +51,6 @@ const InputForm: React.FC = () => {
                 <h2 className="text-3xl font-bold mb-6">🔍 Scrape Reviews</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Platform Selection Dropdown */}
                     <select 
                         className="w-full p-3 rounded-xl bg-[#2A2A2A] text-white border border-gray-600"
                         value={platform}
@@ -63,19 +62,19 @@ const InputForm: React.FC = () => {
 
                     <input 
                         type="text"
-                        placeholder="Company URL (for german site use de.companyurl.com)"
+                        placeholder="Company URL"
                         value={companyUrl}
                         onChange={(e) => setCompanyUrl(e.target.value)}
                     />
                     <input 
                         type="text"
-                        placeholder="Keywords (comma-separated, no comma after last word)"
+                        placeholder="Keywords (comma-separated)"
                         value={keywords}
                         onChange={(e) => setKeywords(e.target.value)}
                     />
                     <input 
                         type="text"
-                        placeholder="Include Ratings (e.g., 1,2,3 (no comma after last number))"
+                        placeholder="Include Ratings (e.g., 1,2,3)"
                         value={includeRatings}
                         onChange={(e) => setIncludeRatings(e.target.value)}
                     />
