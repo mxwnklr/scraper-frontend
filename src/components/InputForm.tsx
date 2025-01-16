@@ -15,32 +15,34 @@ export default function InputForm() {
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
-
+  
     try {
       const formData = new FormData();
       formData.append("company_url", companyUrl);
       formData.append("keywords", keywords);
       formData.append("include_ratings", includeRatings);
-
+  
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/process/",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+        { responseType: "blob" } // ✅ Expect a file response (binary data)
       );
-
-      if (response.status === 404) {
-        setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
+  
+      if (response.headers["content-type"].includes("application/json")) {
+        const errorData = await response.data.text();
+        setErrorMessage(errorData || "❌ No matching reviews found.");
         setLoading(false);
         return;
       }
-
+  
+      // ✅ Create a download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error processing request:", error);
       setErrorMessage("❌ Something went wrong. Please try again.");
     }
-
+  
     setLoading(false);
   };
 
