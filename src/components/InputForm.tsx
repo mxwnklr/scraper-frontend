@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function InputForm() {
@@ -9,6 +9,19 @@ export default function InputForm() {
   const [includeRatings, setIncludeRatings] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
+  const [dots, setDots] = useState(""); // Dots for animation
+
+  // Animate the dots every 500ms
+  useEffect(() => {
+    if (loading) {
+      const interval = setInterval(() => {
+        setDots((prev) => (prev === "..." ? "" : prev + "."));
+      }, 500);
+      return () => clearInterval(interval);
+    } else {
+      setDots(""); // Reset dots when not loading
+    }
+  }, [loading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,25 +89,25 @@ export default function InputForm() {
             required
           />
 
-          {/* Submit Button */}
+          {/* Submit Button with Animated Dots */}
           <button
             type="submit"
             className="w-full p-3 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition"
             disabled={loading}
           >
-            {loading ? "Scraping..." : "Start Scraping"}
+            {loading ? `Scraping${dots}` : "Start Scraping"}
           </button>
         </form>
 
-        {/* Download Button */}
+        {/* Subtle Download Button */}
         {downloadUrl && (
           <div className="mt-6 text-center">
             <a
               href={downloadUrl}
               download="scraped_reviews.xlsx"
-              className="w-full block p-3 bg-green-600 rounded-xl font-bold text-center hover:bg-green-500 transition"
+              className="w-full block p-3 bg-gray-700 text-white rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              ⬇️ Download Scraped Data
+              📥 Download Scraped Data
             </a>
           </div>
         )}
