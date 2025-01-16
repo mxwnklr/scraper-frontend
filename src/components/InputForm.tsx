@@ -100,7 +100,7 @@ export default function InputForm() {
 
         {/* ✅ Show error message if no reviews found */}
         {errorMessage && (
-          <div className="mt-4 p-4 bg-red-500 text-white text-center rounded-xl">
+          <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
             {errorMessage}
           </div>
         )}
