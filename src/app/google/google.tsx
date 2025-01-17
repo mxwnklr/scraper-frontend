@@ -67,7 +67,7 @@ export default function GoogleScraper() {
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
       <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
         {/* Header */}
-        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-between w-full">
+        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
           {/* Back Button */}
           <button
             onClick={() => router.push("/")}
