@@ -17,32 +17,38 @@ export default function GoogleScraper() {
     setDownloadUrl("");
     setErrorMessage("");
 
-    try {
-      const formData = new FormData();
-      formData.append("google_url", googleUrl);
-      formData.append("min_rating", minRating);
-
-      const response = await axios.post(
-        "https://scraper-backend-fsrl.onrender.com/google",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
-      );
-
-      if (response.status === 404) {
-        setErrorMessage("❌ No matching reviews found. Try a different Google Maps URL or rating.");
+    if (!googleUrl) {
+        setErrorMessage("❌ Google Maps URL is required.");
         setLoading(false);
         return;
-      }
+    }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      setDownloadUrl(url);
+    try {
+        const formData = new FormData();
+        formData.append("google_url", googleUrl);
+        if (minRating) formData.append("min_rating", minRating);
+
+        const response = await axios.post(
+            "https://scraper-backend-fsrl.onrender.com/google",
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+        );
+
+        if (response.status === 404) {
+            setErrorMessage("❌ No matching reviews found. Try a different Google Maps URL or rating.");
+            setLoading(false);
+            return;
+        }
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        setDownloadUrl(url);
     } catch (error: any) {
-      console.error("Error processing request:", error);
-      setErrorMessage("❌ Something went wrong. Please try again.");
+        console.error("Error processing request:", error);
+        setErrorMessage("❌ Something went wrong. Please try again.");
     }
 
     setLoading(false);
-  };
+};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
