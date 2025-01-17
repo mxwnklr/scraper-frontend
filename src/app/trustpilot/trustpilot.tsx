@@ -64,9 +64,8 @@ export default function TrustpilotForm() {
         {/* 🔙 Back Button */}
         <button
           onClick={() => router.push("/")}
-          className="absolute top-5 left-5 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-xl flex items-center"
+          className="absolute top-6 left-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-xl flex items-center"
         >
-          <img src="/back-icon.svg" alt="Back" className="w-5 h-5 mr-2" />
           Back
         </button>
 
