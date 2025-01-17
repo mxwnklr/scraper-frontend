@@ -2,9 +2,8 @@
 import { useState } from "react";
 import axios from "axios";
 
-export default function GoogleReviewsForm() {
-  const [businessName, setBusinessName] = useState("");
-  const [location, setLocation] = useState("");
+export default function GoogleForm() {
+  const [placeUrl, setPlaceUrl] = useState("");
   const [minRating, setMinRating] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
@@ -18,8 +17,7 @@ export default function GoogleReviewsForm() {
 
     try {
       const formData = new FormData();
-      formData.append("business_name", businessName);
-      formData.append("location", location);
+      formData.append("place_url", placeUrl);
       formData.append("min_rating", minRating);
 
       const response = await axios.post(
@@ -28,9 +26,20 @@ export default function GoogleReviewsForm() {
         { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
       );
 
-      if (response.status === 404) {
-        setErrorMessage("❌ No reviews found for this business.");
-        setLoading(false);
+      if (response.headers["content-type"].includes("application/json")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const errorJson = JSON.parse(reader.result as string);
+            if (errorJson.error) {
+              setErrorMessage(errorJson.error);
+              setLoading(false);
+            }
+          } catch (err) {
+            setErrorMessage("❌ Unexpected error. Please try again.");
+          }
+        };
+        reader.readAsText(response.data);
         return;
       }
 
@@ -46,7 +55,7 @@ export default function GoogleReviewsForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
-      <div className="w-full max-w-2xl p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
+      <div className="w-full max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
         {/* Header */}
         <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
           <span className="mr-2">🔍</span> Scrape Google Reviews
@@ -54,40 +63,48 @@ export default function GoogleReviewsForm() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Business Name */}
+          {/* Google Maps URL Input */}
           <div className="relative">
             <input
               type="text"
-              placeholder="Business Name"
-              value={businessName}
-              onChange={(e) => setBusinessName(e.target.value)}
+              placeholder="Google Maps URL"
+              value={placeUrl}
+              onChange={(e) => setPlaceUrl(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+            <div className="absolute right-4 top-4 group">
+              <img
+                src="/info-icon.svg"
+                alt="Info"
+                className="w-5 h-5 text-white opacity-75 cursor-pointer"
+              />
+              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
+                Paste the Google Maps share link (e.g., https://maps.app.goo.gl/... or full URL)
+              </div>
+            </div>
           </div>
 
-          {/* Location */}
+          {/* Minimum Rating Input */}
           <div className="relative">
             <input
               type="text"
-              placeholder="Location (City, Country)"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          {/* Minimum Rating */}
-          <div className="relative">
-            <input
-              type="number"
               placeholder="Minimum Rating (1-5)"
               value={minRating}
               onChange={(e) => setMinRating(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+            <div className="absolute right-4 top-4 group">
+              <img
+                src="/info-icon.svg"
+                alt="Info"
+                className="w-5 h-5 text-white opacity-75 cursor-pointer"
+              />
+              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
+                Enter a minimum rating (e.g., "4" for reviews with 4+ stars)
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
