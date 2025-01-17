@@ -11,7 +11,21 @@ export default function GoogleScraper() {
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // ✅ Extract Place ID from Google Maps URL
+  const extractPlaceId = (googleUrl: string) => {
+    try {
+        const match = googleUrl.match(/!1s([^!]+)!/);
+        if (!match) {
+            throw new Error("Invalid Google Maps URL. Ensure it's a place URL, not a search URL.");
+        }
+        return match[1];
+    } catch (error: any) {
+        console.error("❌ Error extracting Place ID:", error.message);
+        return null;
+    }
+};
+
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setDownloadUrl("");
@@ -23,10 +37,25 @@ export default function GoogleScraper() {
         return;
     }
 
+    console.log("🔍 Extracting Place ID from URL...");
+    const placeId = extractPlaceId(googleUrl);
+    if (!placeId) {
+        setErrorMessage("❌ Invalid Google Maps URL. Try using a direct place link.");
+        setLoading(false);
+        return;
+    }
+
+    console.log("✅ Extracted Place ID:", placeId);
+
     try {
         const formData = new FormData();
-        formData.append("google_url", googleUrl);
+        formData.append("place_id", placeId);
         if (minRating) formData.append("min_rating", minRating);
+
+        console.log("📡 Sending request to backend:", {
+            place_id: placeId,
+            min_rating: minRating
+        });
 
         const response = await axios.post(
             "https://scraper-backend-fsrl.onrender.com/google",
@@ -34,8 +63,11 @@ export default function GoogleScraper() {
             { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
         );
 
+        console.log("✅ API Response received:", response);
+
         if (response.status === 404) {
-            setErrorMessage("❌ No matching reviews found. Try a different Google Maps URL or rating.");
+            console.warn("⚠️ No matching reviews found.");
+            setErrorMessage("❌ No matching reviews found.");
             setLoading(false);
             return;
         }
@@ -43,7 +75,7 @@ export default function GoogleScraper() {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         setDownloadUrl(url);
     } catch (error: any) {
-        console.error("Error processing request:", error);
+        console.error("❌ API Request Failed:", error);
         setErrorMessage("❌ Something went wrong. Please try again.");
     }
 
