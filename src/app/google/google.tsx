@@ -18,41 +18,42 @@ export default function GoogleScraper() {
     setErrorMessage("");
 
     if (!businessName) {
-        setErrorMessage("❌ Business name is required.");
-        setLoading(false);
-        return;
+      setErrorMessage("❌ Business name is required.");
+      setLoading(false);
+      return;
     }
 
     try {
-        const formData = new FormData();
-        formData.append("business_name", businessName);
-        if (minRating) formData.append("min_rating", minRating);
+      const formData = new FormData();
+      formData.append("business_name", businessName);
+      if (minRating) formData.append("min_rating", minRating);
 
-        console.log("📡 Sending request to backend:", {
-            business_name: businessName,
-            min_rating: minRating
-        });
+      console.log("📡 Sending request to backend:", {
+        business_name: businessName,
+        min_rating: minRating
+      });
 
-        const response = await axios.post(
-            "https://scraper-backend-fsrl.onrender.com/google",
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
-        );
+      const response = await axios.post(
+        "https://scraper-backend-fsrl.onrender.com/google",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+      );
 
-        console.log("✅ API Response received:", response);
+      console.log("✅ API Response received:", response);
 
-        if (response.status === 404) {
-            console.warn("⚠️ No matching reviews found.");
-            setErrorMessage("❌ No matching reviews found.");
-            setLoading(false);
-            return;
-        }
+      if (response.status === 404) {
+        console.warn("⚠️ No matching reviews found.");
+        setErrorMessage("❌ No matching reviews found.");
+        setLoading(false);
+        return;
+      }
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        setDownloadUrl(url);
+      // ✅ Create URL for downloading the Excel file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      setDownloadUrl(url);
     } catch (error: any) {
-        console.error("❌ API Request Failed:", error);
-        setErrorMessage("❌ Something went wrong. Please try again.");
+      console.error("❌ API Request Failed:", error);
+      setErrorMessage("❌ Something went wrong. Please try again.");
     }
 
     setLoading(false);
@@ -96,7 +97,28 @@ export default function GoogleScraper() {
                 className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
               <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter the name of the business exactly as it appears on Google.
+                Enter the business name exactly as it appears on Google Maps.
+              </div>
+            </div>
+          </div>
+
+          {/* Min Rating */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Min Rating (Optional)"
+              value={minRating}
+              onChange={(e) => setMinRating(e.target.value)}
+              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="absolute right-4 top-4 group">
+              <img
+                src="/info-icon.svg"
+                alt="Info"
+                className="w-5 h-5 text-white opacity-75 cursor-pointer"
+              />
+              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
+                Enter a minimum rating (1-5) to filter reviews. Leave empty for all reviews.
               </div>
             </div>
           </div>
@@ -111,7 +133,25 @@ export default function GoogleScraper() {
           </button>
         </form>
 
-        {errorMessage && <div className="mt-4 p-4 text-red-500 text-center rounded-xl">{errorMessage}</div>}
+        {/* ✅ Show error message if no reviews found */}
+        {errorMessage && (
+          <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* ✅ Show download button only if there is a file */}
+        {downloadUrl && !errorMessage && (
+          <div className="mt-6">
+            <a
+              href={downloadUrl}
+              download="google_reviews.xlsx"
+              className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+            >
+              ⬇️ Download Scraped Data
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
