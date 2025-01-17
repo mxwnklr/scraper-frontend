@@ -61,16 +61,15 @@ export default function TrustpilotForm() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
       <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700 relative">
-        {/* 🔙 Back Button */}
+
+        {/* Header */}
+        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
         <button
           onClick={() => router.push("/")}
           className="absolute top-6 left-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-xl flex items-center"
         >
           Back
         </button>
-
-        {/* Header */}
-        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
           <span className="mr-2">🔍</span> Scrape Trustpilot Reviews
         </h2>
 
