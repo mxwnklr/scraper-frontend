@@ -66,7 +66,7 @@ export default function TrustpilotForm() {
         <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
         <button
           onClick={() => router.push("/")}
-          className="absolute top-6 left-6 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-xl flex items-center"
+          className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-xl flex items-center"
         >
           Back
         </button>
