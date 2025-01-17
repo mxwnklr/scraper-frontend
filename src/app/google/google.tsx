@@ -26,60 +26,60 @@ export default function GoogleScraper() {
 };
 
 const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setDownloadUrl("");
-    setErrorMessage("");
+  e.preventDefault();
+  setLoading(true);
+  setDownloadUrl("");
+  setErrorMessage("");
 
-    if (!googleUrl) {
-        setErrorMessage("❌ Google Maps URL is required.");
-        setLoading(false);
-        return;
-    }
+  if (!googleUrl) {
+      setErrorMessage("❌ Google Maps URL is required.");
+      setLoading(false);
+      return;
+  }
 
-    console.log("🔍 Extracting Place ID from URL...");
-    const placeId = extractPlaceId(googleUrl);
-    if (!placeId) {
-        setErrorMessage("❌ Invalid Google Maps URL. Try using a direct place link.");
-        setLoading(false);
-        return;
-    }
+  console.log("🔍 Extracting Place ID from URL...");
+  const placeId = extractPlaceId(googleUrl);
+  if (!placeId) {
+      setErrorMessage("❌ Invalid Google Maps URL. Try using a direct place link.");
+      setLoading(false);
+      return;
+  }
 
-    console.log("✅ Extracted Place ID:", placeId);
+  console.log("✅ Extracted Place ID:", placeId);
 
-    try {
-        const formData = new FormData();
-        formData.append("place_id", placeId);
-        if (minRating) formData.append("min_rating", minRating);
+  try {
+      const formData = new FormData();
+      formData.append("place_id", placeId);
+      if (minRating) formData.append("min_rating", minRating);
 
-        console.log("📡 Sending request to backend:", {
-            place_id: placeId,
-            min_rating: minRating
-        });
+      console.log("📡 Sending request to backend:", {
+          place_id: placeId,
+          min_rating: minRating
+      });
 
-        const response = await axios.post(
-            "https://scraper-backend-fsrl.onrender.com/google",
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
-        );
+      const response = await axios.post(
+          "https://scraper-backend-fsrl.onrender.com/google",
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+      );
 
-        console.log("✅ API Response received:", response);
+      console.log("✅ API Response received:", response);
 
-        if (response.status === 404) {
-            console.warn("⚠️ No matching reviews found.");
-            setErrorMessage("❌ No matching reviews found.");
-            setLoading(false);
-            return;
-        }
+      if (response.status === 404) {
+          console.warn("⚠️ No matching reviews found.");
+          setErrorMessage("❌ No matching reviews found.");
+          setLoading(false);
+          return;
+      }
 
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        setDownloadUrl(url);
-    } catch (error: any) {
-        console.error("❌ API Request Failed:", error);
-        setErrorMessage("❌ Something went wrong. Please try again.");
-    }
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      setDownloadUrl(url);
+  } catch (error: any) {
+      console.error("❌ API Request Failed:", error);
+      setErrorMessage("❌ Something went wrong. Please try again.");
+  }
 
-    setLoading(false);
+  setLoading(false);
 };
 
   return (
