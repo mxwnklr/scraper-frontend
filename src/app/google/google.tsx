@@ -5,36 +5,57 @@ import { useRouter } from "next/navigation";
 
 export default function GoogleScraper() {
   const router = useRouter();
-  const [placeName, setPlaceName] = useState("");
+  const [googleUrl, setGoogleUrl] = useState("");
   const [minRating, setMinRating] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // ✅ Handles the form submission
+  // ✅ Extract Place ID from Google Maps URL
+  const extractPlaceId = (url: string) => {
+    try {
+      // Updated regex for better Place ID extraction
+      const match = url.match(/!1s([^!]+)!/);
+      if (!match) {
+        throw new Error("Invalid Google Maps URL. Ensure it's a direct place URL.");
+      }
+      return match[1];
+    } catch (error: any) {
+      console.error("❌ Error extracting Place ID:", error.message);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
 
-    if (!placeName) {
-      setErrorMessage("❌ Business name or address is required.");
+    if (!googleUrl) {
+      setErrorMessage("❌ Google Maps URL is required.");
       setLoading(false);
       return;
     }
 
-    console.log("📡 Fetching Place ID for:", placeName);
+    console.log("🔍 Extracting Place ID from URL...");
+    const placeId = extractPlaceId(googleUrl);
+    if (!placeId) {
+      setErrorMessage("❌ Invalid Google Maps URL. Try using a direct place link.");
+      setLoading(false);
+      return;
+    }
+
+    console.log("✅ Extracted Place ID:", placeId);
 
     try {
-      // ✅ Send request to backend to get Place ID and reviews
       const formData = new FormData();
-      formData.append("place_name", placeName);
+      formData.append("place_id", placeId);
       if (minRating) formData.append("min_rating", minRating);
 
       console.log("📡 Sending request to backend:", {
-        place_name: placeName,
-        min_rating: minRating,
+        place_id: placeId,
+        min_rating: minRating
       });
 
       const response = await axios.post(
@@ -52,7 +73,6 @@ export default function GoogleScraper() {
         return;
       }
 
-      // ✅ Handle Excel file download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
@@ -67,7 +87,7 @@ export default function GoogleScraper() {
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
       <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
         {/* Header */}
-        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
+        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-between w-full">
           {/* Back Button */}
           <button
             onClick={() => router.push("/")}
@@ -84,13 +104,13 @@ export default function GoogleScraper() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Business Name */}
+          {/* Google Maps URL */}
           <div className="relative">
             <input
               type="text"
-              placeholder="Business Name or Address"
-              value={placeName}
-              onChange={(e) => setPlaceName(e.target.value)}
+              placeholder="Google Maps URL"
+              value={googleUrl}
+              onChange={(e) => setGoogleUrl(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -101,7 +121,7 @@ export default function GoogleScraper() {
                 className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
               <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter the name of the business or its full address (e.g., "Starbucks Berlin").
+                Paste the Google Maps URL of the business. Click "Share" → "Copy Link" in Google Maps.
               </div>
             </div>
           </div>
@@ -114,6 +134,7 @@ export default function GoogleScraper() {
               value={minRating}
               onChange={(e) => setMinRating(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
             <div className="absolute right-4 top-4 group">
               <img
@@ -158,7 +179,7 @@ export default function GoogleScraper() {
               download="google_reviews.xlsx"
               className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              ⬇️ Download Excel File
+              ⬇️ Download Scraped Data
             </a>
           </div>
         )}
