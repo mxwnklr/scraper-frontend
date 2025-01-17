@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
-export default function GoogleForm() {
-  const [placeUrl, setPlaceUrl] = useState("");
+export default function GoogleReviewsForm() {
+  const router = useRouter();
+  const [googleUrl, setGoogleUrl] = useState("");
   const [minRating, setMinRating] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
@@ -17,7 +19,7 @@ export default function GoogleForm() {
 
     try {
       const formData = new FormData();
-      formData.append("place_url", placeUrl);
+      formData.append("google_maps_url", googleUrl);
       formData.append("min_rating", minRating);
 
       const response = await axios.post(
@@ -47,7 +49,7 @@ export default function GoogleForm() {
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("Error processing request:", error);
-      setErrorMessage("❌ Something went wrong. Please try again.");
+      setErrorMessage("❌ No reviews found. Please try another URL.");
     }
 
     setLoading(false);
@@ -55,93 +57,30 @@ export default function GoogleForm() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
-      <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
+      <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700 relative">
         {/* Header */}
-        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center">
+        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-center gap-x-4">
+          {/* Back Button */}
+        <button
+          onClick={() => router.push("/")}
+          className="bg-gray-700 hover:bg-gray-600 text-white text-lg font-bold py-2 px-4 rounded-xl flex items-center"
+        >
+          Back
+        </button>
           <span className="mr-2">🔍</span> Scrape Google Reviews
         </h2>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Google Maps URL Input */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Google Maps URL"
-              value={placeUrl}
-              onChange={(e) => setPlaceUrl(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Paste the Google Maps share link (e.g., https://maps.app.goo.gl/... or full URL)
-              </div>
-            </div>
-          </div>
+        {/* Input Fields */}
+        <input type="text" placeholder="Google Maps URL" value={googleUrl} onChange={(e) => setGoogleUrl(e.target.value)} required />
+        <input type="text" placeholder="Min Rating (Optional)" value={minRating} onChange={(e) => setMinRating(e.target.value)} />
 
-          {/* Minimum Rating Input */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Minimum Rating (1-5)"
-              value={minRating}
-              onChange={(e) => setMinRating(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter a minimum rating (e.g., "4" for reviews with 4+ stars)
-              </div>
-            </div>
-          </div>
+        {/* Submit Button */}
+        <button type="submit" disabled={loading}>
+          {loading ? "Scraping..." : "Start Scraping"}
+        </button>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition"
-            disabled={loading}
-          >
-            {loading ? (
-              <span>
-                Scraping<span className="animate-pulse">...</span>
-              </span>
-            ) : (
-              "Start Scraping"
-            )}
-          </button>
-        </form>
-
-        {/* ✅ Show error message if no reviews found */}
-        {errorMessage && (
-          <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
-            {errorMessage}
-          </div>
-        )}
-
-        {/* ✅ Show download button only if there is a file */}
-        {downloadUrl && !errorMessage && (
-          <div className="mt-6">
-            <a
-              href={downloadUrl}
-              download="google_reviews.xlsx"
-              className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
-            >
-              ⬇️ Download Scraped Data
-            </a>
-          </div>
-        )}
+        {/* Error Handling */}
+        {errorMessage && <div className="text-red-500">{errorMessage}</div>}
       </div>
     </div>
   );
