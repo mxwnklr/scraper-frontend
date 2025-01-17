@@ -40,22 +40,20 @@ export default function GoogleScraper() {
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "json" }
+        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
       );
 
       console.log("✅ API Response received:", response);
 
-      if (response.status === 404 || !response.data || response.data.length === 0) {
+      if (response.status === 404) {
         console.warn("⚠️ No matching reviews found.");
         setErrorMessage("❌ No matching reviews found.");
         setLoading(false);
         return;
       }
 
-      // ✅ Convert JSON data to Blob for download
-      const jsonString = JSON.stringify(response.data, null, 2);
-      const blob = new Blob([jsonString], { type: "application/json" });
-      const url = window.URL.createObjectURL(blob);
+      // ✅ Handle Excel file download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("❌ API Request Failed:", error);
@@ -157,10 +155,10 @@ export default function GoogleScraper() {
           <div className="mt-6">
             <a
               href={downloadUrl}
-              download="google_reviews.json"
+              download="google_reviews.xlsx"
               className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              ⬇️ Download JSON Data
+              ⬇️ Download Excel File
             </a>
           </div>
         )}
