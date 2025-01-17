@@ -93,7 +93,7 @@ export default function GoogleScraper() {
             </div>
           </div>
 
-          {/* Min Rating (Optional) */}
+          {/* Min Rating */}
           <div className="relative">
             <input
               type="text"
@@ -101,6 +101,7 @@ export default function GoogleScraper() {
               value={minRating}
               onChange={(e) => setMinRating(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
             <div className="absolute right-4 top-4 group">
               <img
