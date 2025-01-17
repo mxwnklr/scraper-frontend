@@ -5,82 +5,65 @@ import { useRouter } from "next/navigation";
 
 export default function GoogleScraper() {
   const router = useRouter();
-  const [googleUrl, setGoogleUrl] = useState("");
+  const [placeName, setPlaceName] = useState("");
   const [minRating, setMinRating] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // ✅ Extract Place ID from Google Maps URL
-  const extractPlaceId = (googleUrl: string) => {
-    try {
-        const match = googleUrl.match(/!1s([^!]+)!/);
-        if (!match) {
-            throw new Error("Invalid Google Maps URL. Ensure it's a place URL, not a search URL.");
-        }
-        return match[1];
-    } catch (error: any) {
-        console.error("❌ Error extracting Place ID:", error.message);
-        return null;
+  // ✅ Handles the form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setDownloadUrl("");
+    setErrorMessage("");
+
+    if (!placeName) {
+      setErrorMessage("❌ Business name or address is required.");
+      setLoading(false);
+      return;
     }
-};
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setDownloadUrl("");
-  setErrorMessage("");
+    console.log("📡 Fetching Place ID for:", placeName);
 
-  if (!googleUrl) {
-      setErrorMessage("❌ Google Maps URL is required.");
-      setLoading(false);
-      return;
-  }
-
-  console.log("🔍 Extracting Place ID from URL...");
-  const placeId = extractPlaceId(googleUrl);
-  if (!placeId) {
-      setErrorMessage("❌ Invalid Google Maps URL. Try using a direct place link.");
-      setLoading(false);
-      return;
-  }
-
-  console.log("✅ Extracted Place ID:", placeId);
-
-  try {
+    try {
+      // ✅ Send request to backend to get Place ID and reviews
       const formData = new FormData();
-      formData.append("place_id", placeId);
+      formData.append("place_name", placeName);
       if (minRating) formData.append("min_rating", minRating);
 
       console.log("📡 Sending request to backend:", {
-          place_id: placeId,
-          min_rating: minRating
+        place_name: placeName,
+        min_rating: minRating,
       });
 
       const response = await axios.post(
-          "https://scraper-backend-fsrl.onrender.com/google",
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+        "https://scraper-backend-fsrl.onrender.com/google",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" }, responseType: "json" }
       );
 
       console.log("✅ API Response received:", response);
 
-      if (response.status === 404) {
-          console.warn("⚠️ No matching reviews found.");
-          setErrorMessage("❌ No matching reviews found.");
-          setLoading(false);
-          return;
+      if (response.status === 404 || !response.data || response.data.length === 0) {
+        console.warn("⚠️ No matching reviews found.");
+        setErrorMessage("❌ No matching reviews found.");
+        setLoading(false);
+        return;
       }
 
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // ✅ Convert JSON data to Blob for download
+      const jsonString = JSON.stringify(response.data, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
       setDownloadUrl(url);
-  } catch (error: any) {
+    } catch (error: any) {
       console.error("❌ API Request Failed:", error);
       setErrorMessage("❌ Something went wrong. Please try again.");
-  }
+    }
 
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
@@ -103,13 +86,13 @@ const handleSubmit = async (e: React.FormEvent) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Google Maps URL */}
+          {/* Business Name */}
           <div className="relative">
             <input
               type="text"
-              placeholder="Google Maps URL"
-              value={googleUrl}
-              onChange={(e) => setGoogleUrl(e.target.value)}
+              placeholder="Business Name or Address"
+              value={placeName}
+              onChange={(e) => setPlaceName(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -120,7 +103,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 className="w-5 h-5 text-white opacity-75 cursor-pointer"
               />
               <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Paste the Google Maps URL of the business. Click "Share" → "Copy Link" in Google Maps.
+                Enter the name of the business or its full address (e.g., "Starbucks Berlin").
               </div>
             </div>
           </div>
@@ -133,7 +116,6 @@ const handleSubmit = async (e: React.FormEvent) => {
               value={minRating}
               onChange={(e) => setMinRating(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
             />
             <div className="absolute right-4 top-4 group">
               <img
@@ -175,10 +157,10 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="mt-6">
             <a
               href={downloadUrl}
-              download="google_reviews.xlsx"
+              download="google_reviews.json"
               className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              ⬇️ Download Scraped Data
+              ⬇️ Download JSON Data
             </a>
           </div>
         )}
