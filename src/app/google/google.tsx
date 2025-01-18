@@ -45,7 +45,7 @@ export default function GoogleScraper() {
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob", timeout: 900000 }
       );
 
       console.log("✅ API Response received:", response);
