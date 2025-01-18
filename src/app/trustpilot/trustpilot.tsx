@@ -70,7 +70,7 @@ export default function TrustpilotForm() {
         >
           Back
         </button>
-          🔍 Scrape Trustpilot Reviews
+          🔍 Scrape Trustpilot
         </h2>
 
         {/* Form */}
