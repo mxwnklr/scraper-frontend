@@ -114,10 +114,11 @@ export default function GoogleScraper() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Include Ratings (e.g. 1,5) - Leave empty for all"
+              placeholder="Included Ratings (not working rn)"
               value={includeRatings}
               onChange={(e) => setIncludeRatings(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={true}
             />
           </div>
 
@@ -125,10 +126,11 @@ export default function GoogleScraper() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Keywords (e.g. shipping, customer) - Leave empty for all"
+              placeholder="Keywords (not working rn)"
               value={keywords}
               onChange={(e) => setKeywords(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={true}
             />
           </div>
 
