@@ -64,19 +64,19 @@ const handleSubmit = async (e: React.FormEvent) => {
 return (
   <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
     <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700 relative">
-    <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
-          {/* Back Button */}
-          <button
-            onClick={() => router.push("/")}
-            className="bg-gray-700 hover:bg-gray-600 text-white text-lg font-bold py-2 px-4 rounded-xl flex items-center"
-          >
-            Back
-          </button>
-          <div className="flex items-center gap-x-2">
-            <span>🔍</span>
-            <span>Scrape Google Reviews</span>
-          </div>
-        </h2>
+      <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
+        {/* Back Button */}
+        <button
+          onClick={() => router.push("/")}
+          className="bg-gray-700 hover:bg-gray-600 text-white text-lg font-bold py-2 px-4 rounded-xl flex items-center"
+        >
+          Back
+        </button>
+        <div className="flex items-center gap-x-2">
+          <span>🔍</span>
+          <span>Scrape Google Reviews</span>
+        </div>
+      </h2>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="relative">
@@ -134,10 +134,39 @@ return (
             </div>
           </div>
         </div>
-        <button type="submit" disabled={loading}>Start Scraping</button>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4"
+          disabled={loading}
+        >
+          {loading ? (
+            <span>
+              Scraping<span className="animate-pulse">...</span>
+            </span>
+          ) : (
+            "Start Scraping"
+          )}
+        </button>
       </form>
-      {errorMessage && <p>{errorMessage}</p>}
-      {downloadUrl && <a href={downloadUrl} download>Download Scraped Data</a>}
+      {/* ✅ Show error message if no reviews are found */}
+      {errorMessage && (
+        <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
+          {errorMessage}
+        </div>
+      )}
+      {/* ✅ Show download button only if there is a file */}
+      {downloadUrl && !errorMessage && (
+        <div className="mt-6">
+          <a
+            href={downloadUrl}
+            download="google_reviews.xlsx"
+            className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+          >
+            ⬇️ Download Scraped Data
+          </a>
+        </div>
+      )}
     </div>
   </div>
 );

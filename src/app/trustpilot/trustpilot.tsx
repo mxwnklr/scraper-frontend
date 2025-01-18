@@ -17,47 +17,54 @@ export default function TrustpilotScraper() {
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
-
+  
     if (!companyUrl) {
-      setErrorMessage("❌ Company URL is required.");
+      setErrorMessage("❌ Trustpilot URL is required.");
       setLoading(false);
       return;
     }
-
-    console.log("📡 Sending request to backend:", {
-      company_url: companyUrl,
-      keywords: keywords.trim() || "", // ✅ Allow empty keywords
-      include_ratings: includeRatings.trim() || "" // ✅ Allow empty ratings
-    });
-
+  
     try {
       const formData = new FormData();
       formData.append("company_url", companyUrl);
-      formData.append("keywords", keywords.trim() || ""); // ✅ Send an empty string if empty
-      formData.append("include_ratings", includeRatings.trim() || ""); // ✅ Send an empty string if empty
-
+      formData.append("keywords", keywords); // Allow empty input
+      formData.append("include_ratings", includeRatings); // Allow empty input
+  
+      console.log("📡 Sending request to backend:", {
+        company_url: companyUrl,
+        keywords,
+        include_ratings: includeRatings
+      });
+  
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/trustpilot",
         formData,
         { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
       );
-
+  
       console.log("✅ API Response received:", response);
-
+  
       if (response.status === 404) {
         console.warn("⚠️ No matching reviews found.");
-        setErrorMessage("❌ No matching reviews found.");
+        setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
         setLoading(false);
         return;
       }
-
+  
+      // ✅ Handle download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("❌ API Request Failed:", error);
-      setErrorMessage("❌ Something went wrong. Please try again.");
+  
+      // ✅ Handle different error types properly
+      if (error.response?.status === 404) {
+        setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
+      } else {
+        setErrorMessage("❌ Something went wrong. Please try again.");
+      }
     }
-
+  
     setLoading(false);
   };
 
@@ -163,7 +170,7 @@ export default function TrustpilotScraper() {
           </button>
         </form>
 
-        {/* ✅ Show error message if no reviews found */}
+        {/* ✅ Show error message if no reviews are found */}
         {errorMessage && (
           <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
             {errorMessage}
