@@ -69,7 +69,7 @@ return (
           </button>
 
           <div className="flex items-center gap-x-2">
-            <span>🔍 Scrape Google</span>
+            <span>🔍 Scrape Google Reviews</span>
           </div>
         </h2>
 
