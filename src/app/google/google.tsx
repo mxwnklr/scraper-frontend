@@ -1,26 +1,27 @@
 "use client";
 import { useState } from "react";
-import axios from "axios";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export default function GoogleScraper() {
   const router = useRouter();
-  
-  // ✅ State Variables (Ensure all exist)
-  const [businessName, setBusinessName] = useState("");  // Previously googleUrl
-  const [includeRatings, setIncludeRatings] = useState("");  // Previously minRating
+
+  // ✅ State Variables
+  const [businessName, setBusinessName] = useState(""); // Previously googleUrl
+  const [includeRatings, setIncludeRatings] = useState(""); // Previously minRating
   const [keywords, setKeywords] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [progress, setProgress] = useState("⏳ Waiting for response...");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
+    setProgress("⏳ Scraping started...");
 
-    // ✅ Validation (Ensure business name is provided)
     if (!businessName) {
       setErrorMessage("❌ Business name is required.");
       setLoading(false);
@@ -39,10 +40,15 @@ export default function GoogleScraper() {
         keywords: keywords
       });
 
+      // ✅ Axios request with long timeout (to prevent frontend timeout)
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
+        { 
+          headers: { "Content-Type": "multipart/form-data" }, 
+          responseType: "blob",
+          timeout: 600000 // ⏳ 10-minute timeout
+        }
       );
 
       console.log("✅ API Response received:", response);
@@ -61,7 +67,7 @@ export default function GoogleScraper() {
     }
 
     setLoading(false);
-  };
+};
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
@@ -75,7 +81,6 @@ export default function GoogleScraper() {
           >
             Back
           </button>
-
           <div className="flex items-center gap-x-2">
             <span>🔍</span>
             <span>Scrape Google Reviews</span>
@@ -94,16 +99,6 @@ export default function GoogleScraper() {
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter the exact business name as listed on Google Maps.
-              </div>
-            </div>
           </div>
 
           {/* Include Ratings Input */}
@@ -115,16 +110,6 @@ export default function GoogleScraper() {
               onChange={(e) => setIncludeRatings(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter specific ratings (e.g., "1,5" for only 1-star and 5-star reviews).
-              </div>
-            </div>
           </div>
 
           {/* Keywords Input */}
@@ -136,16 +121,6 @@ export default function GoogleScraper() {
               onChange={(e) => setKeywords(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter keywords to filter reviews (e.g., "delivery, customer service").
-              </div>
-            </div>
           </div>
 
           {/* Submit Button */}
@@ -156,13 +131,20 @@ export default function GoogleScraper() {
           >
             {loading ? (
               <span>
-                Scraping<span className="animate-pulse">...</span>
+                {progress} <span className="animate-pulse">...</span>
               </span>
             ) : (
               "Start Scraping"
             )}
           </button>
         </form>
+
+        {/* ✅ Show Progress Message */}
+        {loading && (
+          <div className="mt-4 p-4 text-yellow-500 text-center rounded-xl">
+            {progress}
+          </div>
+        )}
 
         {/* ✅ Show error message if no reviews found */}
         {errorMessage && (
