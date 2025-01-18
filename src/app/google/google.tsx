@@ -57,9 +57,9 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
-      <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
+      <div className="w-full min-w-[400px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
         {/* Header */}
-        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-between w-full">
+        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
           {/* Back Button */}
           <button
             onClick={() => router.push("/")}
@@ -86,6 +86,16 @@ return (
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+            <div className="absolute right-4 top-4 group">
+              <img
+                src="/info-icon.svg"
+                alt="Info"
+                className="w-5 h-5 text-white opacity-75 cursor-pointer"
+              />
+              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
+                Go to Google Maps and search for the business, paste the exact name here
+              </div>
+            </div>
           </div>
 
           {/* Submit Button */}
