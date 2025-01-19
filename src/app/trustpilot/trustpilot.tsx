@@ -70,14 +70,21 @@ export default function TrustpilotScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const page = window.location.pathname.includes("trustpilot") ? "trustpilot" : "google";
-      const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
-      window.location.href = response.data.auth_url;
+        const page = window.location.pathname.includes("trustpilot") ? "trustpilot" : "google";
+        const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
+        
+        if (response.data.auth_url) {
+            // ✅ Open login in a new tab to bypass CORS and redirection issues
+            window.open(response.data.auth_url, "_blank", "noopener,noreferrer");
+        } else {
+            console.error("❌ No auth URL received.");
+            alert("❌ Failed to retrieve login URL.");
+        }
     } catch (error) {
-      console.error("❌ Google Login Failed:", error);
-      alert("❌ Failed to initiate Google Login.");
+        console.error("❌ Google Login Failed:", error);
+        alert("❌ Failed to initiate Google Login.");
     }
-  };
+};
 
   // ✅ Handle Upload to Google Drive
   const handleGoogleDriveUpload = async () => {
