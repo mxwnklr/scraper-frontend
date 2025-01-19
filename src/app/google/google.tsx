@@ -8,12 +8,13 @@ export default function GoogleScraper() {
 
   // ✅ State Variables (Now Includes Address)
   const [businessName, setBusinessName] = useState("");
-  const [address, setAddress] = useState(""); // ✅ New State for Address
+  const [address, setAddress] = useState(""); 
   const [includeRatings, setIncludeRatings] = useState("");
   const [keywords, setKeywords] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Track Google Login Status
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +40,7 @@ export default function GoogleScraper() {
         business_name: businessName,
         address: address,
         include_ratings: includeRatings,
-        keywords: keywords
+        keywords: keywords,
       });
 
       const response = await axios.post(
@@ -66,14 +67,31 @@ export default function GoogleScraper() {
     setLoading(false);
   };
 
+  // ✅ Handle Google Login
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await axios.get("https://scraper-backend-fsrl.onrender.com/google-login");
+      window.location.href = response.request.responseURL; // Redirect to Google OAuth
+    } catch (error) {
+      console.error("❌ Google Login Failed:", error);
+      alert("❌ Failed to authenticate with Google. Try again.");
+    }
+  };
+
   // ✅ Handle Upload to Google Drive
   const handleGoogleDriveUpload = async () => {
     try {
       const response = await axios.post("https://scraper-backend-fsrl.onrender.com/google/upload");
       alert(response.data.message);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Upload Failed:", error);
-      alert("❌ Failed to upload file to Google Drive.");
+
+      if (error.response?.status === 401) {
+        alert("❌ You need to log in with Google first.");
+        setIsAuthenticated(false); // Mark as not authenticated
+      } else {
+        alert("❌ Failed to upload file to Google Drive.");
+      }
     }
   };
 
@@ -109,7 +127,7 @@ export default function GoogleScraper() {
             />
           </div>
 
-          {/* Address Input (New) */}
+          {/* Address Input */}
           <div className="relative">
             <input
               type="text"
@@ -175,12 +193,21 @@ export default function GoogleScraper() {
             </a>
 
             {/* ✅ Upload to Google Drive Button */}
-            <button
-              className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
-              onClick={handleGoogleDriveUpload}
-            >
-              ⬆️ Google Drive
-            </button>
+            {!isAuthenticated ? (
+              <button
+                className="w-1/2 p-4 bg-yellow-600 rounded-xl font-bold hover:bg-yellow-500 transition text-white"
+                onClick={handleGoogleLogin}
+              >
+                🔑 Google Login
+              </button>
+            ) : (
+              <button
+                className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
+                onClick={handleGoogleDriveUpload}
+              >
+                ⬆️ Google Drive
+              </button>
+            )}
           </div>
         )}
       </div>

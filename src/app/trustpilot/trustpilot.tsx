@@ -11,59 +11,71 @@ export default function TrustpilotScraper() {
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Track Google Login Status
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
-  
+
     if (!companyUrl) {
       setErrorMessage("❌ Trustpilot URL is required.");
       setLoading(false);
       return;
     }
-  
+
     try {
       const formData = new FormData();
       formData.append("company_url", companyUrl);
       formData.append("keywords", keywords);
       formData.append("include_ratings", includeRatings);
-  
+
       console.log("📡 Sending request to backend:", {
         company_url: companyUrl,
         keywords,
-        include_ratings: includeRatings
+        include_ratings: includeRatings,
       });
-  
+
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/trustpilot",
         formData,
         { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
       );
-  
+
       console.log("✅ API Response received:", response);
-  
+
       if (response.status === 404) {
         console.warn("⚠️ No matching reviews found.");
         setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
         setLoading(false);
         return;
       }
-  
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("❌ API Request Failed:", error);
-  
+
       if (error.response?.status === 404) {
         setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
       } else {
         setErrorMessage("❌ Something went wrong. Please try again.");
       }
     }
-  
+
     setLoading(false);
+  };
+
+  // ✅ Handle Google Login
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await axios.get("https://scraper-backend-fsrl.onrender.com/google-login");
+      window.location.href = response.request.responseURL; // Redirect to Google OAuth
+    } catch (error) {
+      console.error("❌ Google Login Failed:", error);
+      alert("❌ Failed to authenticate with Google. Try again.");
+    }
   };
 
   // ✅ Handle Upload to Google Drive
@@ -71,9 +83,15 @@ export default function TrustpilotScraper() {
     try {
       const response = await axios.post("https://scraper-backend-fsrl.onrender.com/google/upload");
       alert(response.data.message);
-    } catch (error) {
+    } catch (error: any) {
       console.error("❌ Upload Failed:", error);
-      alert("❌ Failed to upload file to Google Drive.");
+
+      if (error.response?.status === 401) {
+        alert("❌ You need to log in with Google first.");
+        setIsAuthenticated(false); // Mark as not authenticated
+      } else {
+        alert("❌ Failed to upload file to Google Drive.");
+      }
     }
   };
 
@@ -108,16 +126,6 @@ export default function TrustpilotScraper() {
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter the Trustpilot URL of the company.
-              </div>
-            </div>
           </div>
 
           {/* Keywords (Optional) */}
@@ -129,17 +137,6 @@ export default function TrustpilotScraper() {
               onChange={(e) => setKeywords(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter keywords separated by commas (e.g., "shipping, refund").
-                Leave empty to scrape all reviews.
-              </div>
-            </div>
           </div>
 
           {/* Include Ratings (Optional) */}
@@ -151,16 +148,6 @@ export default function TrustpilotScraper() {
               onChange={(e) => setIncludeRatings(e.target.value)}
               className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <div className="absolute right-4 top-4 group">
-              <img
-                src="/info-icon.svg"
-                alt="Info"
-                className="w-5 h-5 text-white opacity-75 cursor-pointer"
-              />
-              <div className="hidden group-hover:block absolute bg-gray-500 text-white text-sm rounded-xl p-3 w-64 right-0 top-full mt-2 z-50 shadow-lg">
-                Enter ratings to filter (e.g., "1,2,3"). Leave empty to scrape all ratings.
-              </div>
-            </div>
           </div>
 
           {/* Submit Button */}
@@ -199,12 +186,21 @@ export default function TrustpilotScraper() {
             </a>
 
             {/* ✅ Upload to Google Drive Button */}
-            <button
-              className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
-              onClick={handleGoogleDriveUpload}
-            >
-              ⬆️ Google Drive
-            </button>
+            {!isAuthenticated ? (
+              <button
+                className="w-1/2 p-4 bg-yellow-600 rounded-xl font-bold hover:bg-yellow-500 transition text-white"
+                onClick={handleGoogleLogin}
+              >
+                🔑 Google Login
+              </button>
+            ) : (
+              <button
+                className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
+                onClick={handleGoogleDriveUpload}
+              >
+                ⬆️ Google Drive
+              </button>
+            )}
           </div>
         )}
       </div>
