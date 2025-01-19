@@ -86,22 +86,33 @@ export default function TrustpilotScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const page = "trustpilot";
+      const page = "google";
       const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
-
+      
       // ✅ Open Google Login in a new tab
       const authWindow = window.open(response.data.auth_url, "_blank", "width=500,height=600");
-
+  
       if (!authWindow) {
         alert("❌ Popup blocked! Please allow popups and try again.");
         return;
       }
-
-      // ✅ Polling method to detect when the login window closes
+  
+      // ✅ Listen for OAuth success message
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin === window.location.origin && event.data === "oauth_success") {
+          setIsAuthenticated(true);
+          alert("✅ Google Authentication Successful!");
+        }
+      };
+  
+      window.addEventListener("message", handleMessage);
+  
+      // ✅ Polling method to detect when login window closes
       const checkAuthInterval = setInterval(() => {
         if (authWindow.closed) {
           clearInterval(checkAuthInterval);
           console.log("🔄 Checking authentication status...");
+          window.removeEventListener("message", handleMessage);
         }
       }, 1000);
     } catch (error) {
