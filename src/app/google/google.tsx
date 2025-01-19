@@ -70,11 +70,12 @@ export default function GoogleScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const response = await axios.get("https://scraper-backend-fsrl.onrender.com/google-login");
-      window.location.href = response.data.auth_url; // ✅ Redirect user to Google login
+      const page = window.location.pathname.includes("trustpilot") ? "trustpilot" : "google";
+      const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
+      window.location.href = response.data.auth_url;
     } catch (error) {
       console.error("❌ Google Login Failed:", error);
-      alert("❌ Failed to authenticate with Google. Try again.");
+      alert("❌ Failed to initiate Google Login.");
     }
   };
 
