@@ -70,14 +70,15 @@ export default function TrustpilotScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-        const page = window.location.pathname.includes("trustpilot") ? "trustpilot" : "google";
-        
-        // Instead of using Axios, navigate directly
-        window.open(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`, "_blank", "noopener,noreferrer");
+      const page = window.location.pathname.includes("trustpilot") ? "trustpilot" : "google";
       
+      // ✅ Open login in a new tab
+      const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
+      window.open(response.data.auth_url, "_blank"); // Open login in a new tab
+  
     } catch (error) {
-        console.error("❌ Google Login Failed:", error);
-        alert("❌ Failed to initiate Google Login.");
+      console.error("❌ Google Login Failed:", error);
+      alert("❌ Failed to initiate Google Login.");
     }
   };
 
