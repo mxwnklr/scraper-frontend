@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -11,7 +11,23 @@ export default function TrustpilotScraper() {
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Track Google Login Status
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // ✅ Listen for OAuth success messages
+    const handleOAuthSuccess = (event: MessageEvent) => {
+      if (event.origin === window.location.origin && event.data === "oauth_success") {
+        alert("✅ Google Authentication Successful!");
+        setIsAuthenticated(true);
+      }
+    };
+
+    window.addEventListener("message", handleOAuthSuccess);
+
+    return () => {
+      window.removeEventListener("message", handleOAuthSuccess);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,12 +86,24 @@ export default function TrustpilotScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const page = window.location.pathname.includes("trustpilot") ? "trustpilot" : "google";
-      
-      // ✅ Open login in a new tab
+      const page = "trustpilot";
       const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
-      window.open(response.data.auth_url, "_blank"); // Open login in a new tab
-  
+
+      // ✅ Open Google Login in a new tab
+      const authWindow = window.open(response.data.auth_url, "_blank", "width=500,height=600");
+
+      if (!authWindow) {
+        alert("❌ Popup blocked! Please allow popups and try again.");
+        return;
+      }
+
+      // ✅ Polling method to detect when the login window closes
+      const checkAuthInterval = setInterval(() => {
+        if (authWindow.closed) {
+          clearInterval(checkAuthInterval);
+          console.log("🔄 Checking authentication status...");
+        }
+      }, 1000);
     } catch (error) {
       console.error("❌ Google Login Failed:", error);
       alert("❌ Failed to initiate Google Login.");
@@ -92,7 +120,7 @@ export default function TrustpilotScraper() {
 
       if (error.response?.status === 401) {
         alert("❌ You need to log in with Google first.");
-        setIsAuthenticated(false); // Mark as not authenticated
+        setIsAuthenticated(false);
       } else {
         alert("❌ Failed to upload file to Google Drive.");
       }
@@ -120,7 +148,6 @@ export default function TrustpilotScraper() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Company URL */}
           <div className="relative">
             <input
               type="text"
@@ -132,7 +159,6 @@ export default function TrustpilotScraper() {
             />
           </div>
 
-          {/* Keywords (Optional) */}
           <div className="relative">
             <input
               type="text"
@@ -143,7 +169,6 @@ export default function TrustpilotScraper() {
             />
           </div>
 
-          {/* Include Ratings (Optional) */}
           <div className="relative">
             <input
               type="text"
@@ -154,33 +179,23 @@ export default function TrustpilotScraper() {
             />
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4"
             disabled={loading}
           >
-            {loading ? (
-              <span>
-                Scraping<span className="animate-pulse">...</span>
-              </span>
-            ) : (
-              "Start Scraping"
-            )}
+            {loading ? "Scraping..." : "Start Scraping"}
           </button>
         </form>
 
-        {/* ✅ Show error message if no reviews are found */}
         {errorMessage && (
           <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
             {errorMessage}
           </div>
         )}
 
-        {/* ✅ Show buttons only if there is a file */}
         {downloadUrl && !errorMessage && (
           <div className="mt-6 flex gap-4">
-            {/* ✅ Download Button */}
             <a
               href={downloadUrl}
               download="trustpilot_reviews.xlsx"
@@ -189,19 +204,12 @@ export default function TrustpilotScraper() {
               ⬇️ Download
             </a>
 
-            {/* ✅ Upload to Google Drive Button */}
             {!isAuthenticated ? (
-              <button
-                className="w-1/2 p-4 bg-yellow-600 rounded-xl font-bold hover:bg-yellow-500 transition text-white"
-                onClick={handleGoogleLogin}
-              >
+              <button className="w-1/2 p-4 bg-yellow-600 rounded-xl font-bold hover:bg-yellow-500 transition text-white" onClick={handleGoogleLogin}>
                 🔑 Google Login
               </button>
             ) : (
-              <button
-                className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
-                onClick={handleGoogleDriveUpload}
-              >
+              <button className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white" onClick={handleGoogleDriveUpload}>
                 ⬆️ Google Drive
               </button>
             )}

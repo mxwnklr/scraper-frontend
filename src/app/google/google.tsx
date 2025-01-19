@@ -1,11 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
 export default function GoogleScraper() {
   const router = useRouter();
-
+  
   // ✅ State Variables (Now Includes Address)
   const [businessName, setBusinessName] = useState("");
   const [address, setAddress] = useState(""); 
@@ -16,13 +16,28 @@ export default function GoogleScraper() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Track Google Login Status
 
+  // ✅ Listen for OAuth Success Messages
+  useEffect(() => {
+    const handleOAuthSuccess = (event: MessageEvent) => {
+      if (event.origin === window.location.origin && event.data === "oauth_success") {
+        alert("✅ Google Authentication Successful!");
+        setIsAuthenticated(true);
+      }
+    };
+
+    window.addEventListener("message", handleOAuthSuccess);
+
+    return () => {
+      window.removeEventListener("message", handleOAuthSuccess);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setDownloadUrl("");
     setErrorMessage("");
 
-    // ✅ Validation (Ensure both business name and address are provided)
     if (!businessName || !address) {
       setErrorMessage("❌ Business name and address are required.");
       setLoading(false);
@@ -32,16 +47,11 @@ export default function GoogleScraper() {
     try {
       const formData = new FormData();
       formData.append("business_name", businessName);
-      formData.append("address", address); // ✅ Include Address in API Call
+      formData.append("address", address); 
       if (includeRatings) formData.append("include_ratings", includeRatings);
       if (keywords) formData.append("keywords", keywords);
 
-      console.log("📡 Sending request to backend:", {
-        business_name: businessName,
-        address: address,
-        include_ratings: includeRatings,
-        keywords: keywords,
-      });
+      console.log("📡 Sending request to backend:", { businessName, address, includeRatings, keywords });
 
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google",
@@ -70,12 +80,24 @@ export default function GoogleScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const page = window.location.pathname.includes("trustpilot") ? "trustpilot" : "google";
-      
-      // ✅ Open login in a new tab
+      const page = "google";
       const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
-      window.open(response.data.auth_url, "_blank"); // Open login in a new tab
-  
+
+      // ✅ Open Google Login in a new tab
+      const authWindow = window.open(response.data.auth_url, "_blank", "width=500,height=600");
+
+      if (!authWindow) {
+        alert("❌ Popup blocked! Please allow popups and try again.");
+        return;
+      }
+
+      // ✅ Polling method to detect when login window closes
+      const checkAuthInterval = setInterval(() => {
+        if (authWindow.closed) {
+          clearInterval(checkAuthInterval);
+          console.log("🔄 Checking authentication status...");
+        }
+      }, 1000);
     } catch (error) {
       console.error("❌ Google Login Failed:", error);
       alert("❌ Failed to initiate Google Login.");
@@ -92,7 +114,7 @@ export default function GoogleScraper() {
 
       if (error.response?.status === 401) {
         alert("❌ You need to log in with Google first.");
-        setIsAuthenticated(false); // Mark as not authenticated
+        setIsAuthenticated(false);
       } else {
         alert("❌ Failed to upload file to Google Drive.");
       }
@@ -104,11 +126,7 @@ export default function GoogleScraper() {
       <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
         {/* Header */}
         <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
-          {/* Back Button */}
-          <button
-            onClick={() => router.push("/")}
-            className="bg-gray-700 hover:bg-gray-600 text-white text-lg font-bold py-2 px-4 rounded-xl flex items-center"
-          >
+          <button onClick={() => router.push("/")} className="bg-gray-700 hover:bg-gray-600 text-white text-lg font-bold py-2 px-4 rounded-xl flex items-center">
             Back
           </button>
           <div className="flex items-center gap-x-2">
@@ -119,96 +137,35 @@ export default function GoogleScraper() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Business Name Input */}
           <div className="relative">
-            <input
-              type="text"
-              placeholder="Business Name"
-              value={businessName}
-              onChange={(e) => setBusinessName(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <input type="text" placeholder="Business Name" value={businessName} onChange={(e) => setBusinessName(e.target.value)}
+              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
           </div>
 
-          {/* Address Input */}
           <div className="relative">
-            <input
-              type="text"
-              placeholder="Business Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <input type="text" placeholder="Business Address" value={address} onChange={(e) => setAddress(e.target.value)}
+              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required />
           </div>
 
-          {/* Include Ratings Input */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Included Ratings (not working rn)"
-              value={includeRatings}
-              onChange={(e) => setIncludeRatings(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={true}
-            />
-          </div>
-
-          {/* Keywords Input */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Keywords (not working rn)"
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={true}
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4"
-            disabled={loading}
-          >
+          <button type="submit" className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4" disabled={loading}>
             {loading ? "Scraping..." : "Start Scraping"}
           </button>
         </form>
 
-        {/* Error Message */}
-        {errorMessage && (
-          <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
-            {errorMessage}
-          </div>
-        )}
+        {errorMessage && <div className="mt-4 p-4 text-red-500 text-center rounded-xl">{errorMessage}</div>}
 
-        {/* Buttons for Download & Upload */}
         {downloadUrl && !errorMessage && (
           <div className="mt-6 flex gap-4">
-            {/* ✅ Download Button */}
-            <a
-              href={downloadUrl}
-              download="google_reviews.xlsx"
-              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
-            >
+            <a href={downloadUrl} download="google_reviews.xlsx" className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition">
               ⬇️ Download
             </a>
 
-            {/* ✅ Upload to Google Drive Button */}
             {!isAuthenticated ? (
-              <button
-                className="w-1/2 p-4 bg-yellow-600 rounded-xl font-bold hover:bg-yellow-500 transition text-white"
-                onClick={handleGoogleLogin}
-              >
+              <button className="w-1/2 p-4 bg-yellow-600 rounded-xl font-bold hover:bg-yellow-500 transition text-white" onClick={handleGoogleLogin}>
                 🔑 Google Login
               </button>
             ) : (
-              <button
-                className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
-                onClick={handleGoogleDriveUpload}
-              >
+              <button className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white" onClick={handleGoogleDriveUpload}>
                 ⬆️ Google Drive
               </button>
             )}
