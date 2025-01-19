@@ -66,6 +66,17 @@ export default function GoogleScraper() {
     setLoading(false);
   };
 
+  // ✅ Handle Upload to Google Drive
+  const handleGoogleDriveUpload = async () => {
+    try {
+      const response = await axios.post("https://scraper-backend-fsrl.onrender.com/google/upload");
+      alert(response.data.message);
+    } catch (error) {
+      console.error("❌ Upload Failed:", error);
+      alert("❌ Failed to upload file to Google Drive.");
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
       <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
@@ -151,16 +162,25 @@ export default function GoogleScraper() {
           </div>
         )}
 
-        {/* Download Button */}
+        {/* Buttons for Download & Upload */}
         {downloadUrl && !errorMessage && (
-          <div className="mt-6">
+          <div className="mt-6 flex gap-4">
+            {/* ✅ Download Button */}
             <a
               href={downloadUrl}
               download="google_reviews.xlsx"
-              className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              ⬇️ Download Scraped Data
+              ⬇️ Download
             </a>
+
+            {/* ✅ Upload to Google Drive Button */}
+            <button
+              className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
+              onClick={handleGoogleDriveUpload}
+            >
+              ⬆️ Google Drive
+            </button>
           </div>
         )}
       </div>

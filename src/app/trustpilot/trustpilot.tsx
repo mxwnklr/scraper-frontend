@@ -27,8 +27,8 @@ export default function TrustpilotScraper() {
     try {
       const formData = new FormData();
       formData.append("company_url", companyUrl);
-      formData.append("keywords", keywords); // Allow empty input
-      formData.append("include_ratings", includeRatings); // Allow empty input
+      formData.append("keywords", keywords);
+      formData.append("include_ratings", includeRatings);
   
       console.log("📡 Sending request to backend:", {
         company_url: companyUrl,
@@ -51,13 +51,11 @@ export default function TrustpilotScraper() {
         return;
       }
   
-      // ✅ Handle download
       const url = window.URL.createObjectURL(new Blob([response.data]));
       setDownloadUrl(url);
     } catch (error: any) {
       console.error("❌ API Request Failed:", error);
   
-      // ✅ Handle different error types properly
       if (error.response?.status === 404) {
         setErrorMessage("❌ No matching reviews found. Try different keywords or ratings.");
       } else {
@@ -66,6 +64,17 @@ export default function TrustpilotScraper() {
     }
   
     setLoading(false);
+  };
+
+  // ✅ Handle Upload to Google Drive
+  const handleGoogleDriveUpload = async () => {
+    try {
+      const response = await axios.post("https://scraper-backend-fsrl.onrender.com/google/upload");
+      alert(response.data.message);
+    } catch (error) {
+      console.error("❌ Upload Failed:", error);
+      alert("❌ Failed to upload file to Google Drive.");
+    }
   };
 
   return (
@@ -177,16 +186,25 @@ export default function TrustpilotScraper() {
           </div>
         )}
 
-        {/* ✅ Show download button only if there is a file */}
+        {/* ✅ Show buttons only if there is a file */}
         {downloadUrl && !errorMessage && (
-          <div className="mt-6">
+          <div className="mt-6 flex gap-4">
+            {/* ✅ Download Button */}
             <a
               href={downloadUrl}
               download="trustpilot_reviews.xlsx"
-              className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              ⬇️ Download Scraped Data
+              ⬇️ Download
             </a>
+
+            {/* ✅ Upload to Google Drive Button */}
+            <button
+              className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white"
+              onClick={handleGoogleDriveUpload}
+            >
+              ⬆️ Google Drive
+            </button>
           </div>
         )}
       </div>
