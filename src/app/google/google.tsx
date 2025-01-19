@@ -71,7 +71,8 @@ export default function GoogleScraper() {
   const handleGoogleLogin = async () => {
     try {
       const response = await axios.get("https://scraper-backend-fsrl.onrender.com/google-login");
-      window.location.href = response.request.responseURL; // Redirect to Google OAuth
+      const loginUrl = response.data.auth_url; // ✅ Get URL from backend
+      window.open(loginUrl, "_blank"); // ✅ Open OAuth in a new tab
     } catch (error) {
       console.error("❌ Google Login Failed:", error);
       alert("❌ Failed to authenticate with Google. Try again.");
