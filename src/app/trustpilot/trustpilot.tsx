@@ -86,8 +86,17 @@ export default function TrustpilotScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const page = "trustpilot"; // Changed from "google" to "trustpilot"
-      const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
+      const page = "trustpilot";
+      const response = await axios.get(
+        `https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`,
+        {
+          withCredentials: true,
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
+        }
+      );
       
       // Open Google Login in a popup window (centered)
       const width = 500;
