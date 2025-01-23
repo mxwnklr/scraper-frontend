@@ -137,7 +137,10 @@ export default function TrustpilotScraper() {
   const handleGoogleDriveUpload = async () => {
     try {
       // First verify authentication
-      const authCheck = await axios.get('https://scraper-backend-fsrl.onrender.com/auth-status');
+      const authCheck = await axios.get('https://scraper-backend-fsrl.onrender.com/auth-status', {
+        withCredentials: true
+      });
+      
       if (!authCheck.data.authenticated) {
         setIsAuthenticated(false);
         alert("❌ You need to log in with Google first.");
@@ -156,19 +159,18 @@ export default function TrustpilotScraper() {
         "https://scraper-backend-fsrl.onrender.com/google/upload",
         formData,
         {
+          withCredentials: true,
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          withCredentials: true // Important: include credentials
         }
       );
       alert(response.data.message);
     } catch (error: any) {
       console.error("❌ Upload Failed:", error);
-  
       if (error.response?.status === 401) {
-        alert("❌ You need to log in with Google first.");
         setIsAuthenticated(false);
+        alert("❌ You need to log in with Google first.");
       } else {
         alert("❌ Failed to upload file to Google Drive.");
       }
