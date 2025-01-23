@@ -86,35 +86,47 @@ export default function TrustpilotScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const page = "google";
+      const page = "trustpilot"; // Changed from "google" to "trustpilot"
       const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
       
-      // ✅ Open Google Login in a new tab
-      const authWindow = window.open(response.data.auth_url, "_blank", "width=500,height=600");
+      // Open Google Login in a popup window (centered)
+      const width = 500;
+      const height = 600;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+      
+      const authWindow = window.open(
+        response.data.auth_url,
+        "Google Login",
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
   
       if (!authWindow) {
         alert("❌ Popup blocked! Please allow popups and try again.");
         return;
       }
   
-      // ✅ Listen for OAuth success message
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin === window.location.origin && event.data === "oauth_success") {
-          setIsAuthenticated(true);
-          alert("✅ Google Authentication Successful!");
+      // Check authentication status periodically
+      const checkAuth = async () => {
+        try {
+          const statusResponse = await axios.get('https://scraper-backend-fsrl.onrender.com/auth-status');
+          if (statusResponse.data.authenticated) {
+            setIsAuthenticated(true);
+            authWindow.close();
+            alert("✅ Google Authentication Successful!");
+          }
+        } catch (error) {
+          console.error("Failed to check auth status:", error);
         }
       };
   
-      window.addEventListener("message", handleMessage);
-  
-      // ✅ Polling method to detect when login window closes
-      const checkAuthInterval = setInterval(() => {
+      const authCheckInterval = setInterval(async () => {
         if (authWindow.closed) {
-          clearInterval(checkAuthInterval);
-          console.log("🔄 Checking authentication status...");
-          window.removeEventListener("message", handleMessage);
+          clearInterval(authCheckInterval);
+          await checkAuth();
         }
       }, 1000);
+  
     } catch (error) {
       console.error("❌ Google Login Failed:", error);
       alert("❌ Failed to initiate Google Login.");
@@ -124,11 +136,27 @@ export default function TrustpilotScraper() {
   // ✅ Handle Upload to Google Drive
   const handleGoogleDriveUpload = async () => {
     try {
-      const response = await axios.post("https://scraper-backend-fsrl.onrender.com/google/upload");
+      // Create a blob from the download URL
+      const fileResponse = await fetch(downloadUrl);
+      const fileBlob = await fileResponse.blob();
+  
+      // Create FormData and append the file
+      const formData = new FormData();
+      formData.append('file', fileBlob, 'google_reviews.xlsx');
+  
+      const response = await axios.post(
+        "https://scraper-backend-fsrl.onrender.com/google/upload",
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
       alert(response.data.message);
     } catch (error: any) {
       console.error("❌ Upload Failed:", error);
-
+  
       if (error.response?.status === 401) {
         alert("❌ You need to log in with Google first.");
         setIsAuthenticated(false);
