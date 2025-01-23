@@ -107,35 +107,52 @@ export default function TrustpilotScraper() {
       const authWindow = window.open(
         response.data.auth_url,
         "Google Login",
-        `width=${width},height=${height},left=${left},top=${top}`
+        `width=${width},height=${height},left=${left},top=${top},noopener`
       );
-  
+    
       if (!authWindow) {
         alert("❌ Popup blocked! Please allow popups and try again.");
         return;
       }
   
-      // Check authentication status periodically
-      const checkAuth = async () => {
+      // Instead of checking window.closed, use a timer to check auth status
+      let attempts = 0;
+      const maxAttempts = 120; // 2 minutes maximum wait time
+      
+      const authCheckInterval = setInterval(async () => {
         try {
-          const statusResponse = await axios.get('https://scraper-backend-fsrl.onrender.com/auth-status');
+          const statusResponse = await axios.get(
+            'https://scraper-backend-fsrl.onrender.com/auth-status',
+            {
+              withCredentials: true,
+              headers: {
+                'Accept': 'application/json',
+              }
+            }
+          );
+          
           if (statusResponse.data.authenticated) {
+            clearInterval(authCheckInterval);
             setIsAuthenticated(true);
-            authWindow.close();
+            try {
+              authWindow.close();
+            } catch (e) {
+              // Ignore any errors when trying to close the window
+            }
             alert("✅ Google Authentication Successful!");
+            return;
+          }
+          
+          attempts++;
+          if (attempts >= maxAttempts) {
+            clearInterval(authCheckInterval);
+            alert("❌ Authentication timeout. Please try again.");
           }
         } catch (error) {
           console.error("Failed to check auth status:", error);
         }
-      };
-  
-      const authCheckInterval = setInterval(async () => {
-        if (authWindow.closed) {
-          clearInterval(authCheckInterval);
-          await checkAuth();
-        }
       }, 1000);
-  
+    
     } catch (error) {
       console.error("❌ Google Login Failed:", error);
       alert("❌ Failed to initiate Google Login.");
