@@ -3,10 +3,24 @@ import { useEffect } from "react";
 
 export default function OAuthCallback() {
   useEffect(() => {
-    if (window.opener) {
-      window.opener.postMessage("oauth_success", "*");
-      window.close();
-    }
+    const verifyAuth = async () => {
+      try {
+        // Verify authentication before closing
+        const response = await fetch('https://scraper-backend-fsrl.onrender.com/auth-status');
+        const data = await response.json();
+        
+        if (data.authenticated) {
+          if (window.opener) {
+            window.opener.postMessage("oauth_success", "*");
+            window.close();
+          }
+        }
+      } catch (error) {
+        console.error("Auth verification failed:", error);
+      }
+    };
+
+    verifyAuth();
   }, []);
 
   return (

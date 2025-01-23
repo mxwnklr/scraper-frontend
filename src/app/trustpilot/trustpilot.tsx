@@ -136,13 +136,21 @@ export default function TrustpilotScraper() {
   // ✅ Handle Upload to Google Drive
   const handleGoogleDriveUpload = async () => {
     try {
+      // First verify authentication
+      const authCheck = await axios.get('https://scraper-backend-fsrl.onrender.com/auth-status');
+      if (!authCheck.data.authenticated) {
+        setIsAuthenticated(false);
+        alert("❌ You need to log in with Google first.");
+        return;
+      }
+  
       // Create a blob from the download URL
       const fileResponse = await fetch(downloadUrl);
       const fileBlob = await fileResponse.blob();
   
       // Create FormData and append the file
       const formData = new FormData();
-      formData.append('file', fileBlob, 'google_reviews.xlsx');
+      formData.append('file', fileBlob, 'trustpilot_reviews.xlsx');
   
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google/upload",
@@ -151,6 +159,7 @@ export default function TrustpilotScraper() {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
+          withCredentials: true // Important: include credentials
         }
       );
       alert(response.data.message);
