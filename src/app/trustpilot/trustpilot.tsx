@@ -86,73 +86,35 @@ export default function TrustpilotScraper() {
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
     try {
-      const page = "trustpilot";
-      const response = await axios.get(
-        `https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`,
-        {
-          withCredentials: true,
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          }
-        }
-      );
+      const page = "google";
+      const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
       
-      // Open Google Login in a popup window (centered)
-      const width = 500;
-      const height = 600;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      
-      const authWindow = window.open(
-        response.data.auth_url,
-        "Google Login",
-        `width=${width},height=${height},left=${left},top=${top},noopener`
-      );
-    
+      // ✅ Open Google Login in a new tab
+      const authWindow = window.open(response.data.auth_url, "_blank", "width=500,height=600");
+  
       if (!authWindow) {
         alert("❌ Popup blocked! Please allow popups and try again.");
         return;
       }
   
-      // Instead of checking window.closed, use a timer to check auth status
-      let attempts = 0;
-      const maxAttempts = 120; // 2 minutes maximum wait time
-      
-      const authCheckInterval = setInterval(async () => {
-        try {
-          const statusResponse = await axios.get(
-            'https://scraper-backend-fsrl.onrender.com/auth-status',
-            {
-              withCredentials: true,
-              headers: {
-                'Accept': 'application/json',
-              }
-            }
-          );
-          
-          if (statusResponse.data.authenticated) {
-            clearInterval(authCheckInterval);
-            setIsAuthenticated(true);
-            try {
-              authWindow.close();
-            } catch (e) {
-              // Ignore any errors when trying to close the window
-            }
-            alert("✅ Google Authentication Successful!");
-            return;
-          }
-          
-          attempts++;
-          if (attempts >= maxAttempts) {
-            clearInterval(authCheckInterval);
-            alert("❌ Authentication timeout. Please try again.");
-          }
-        } catch (error) {
-          console.error("Failed to check auth status:", error);
+      // ✅ Listen for OAuth success message
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin === window.location.origin && event.data === "oauth_success") {
+          setIsAuthenticated(true);
+          alert("✅ Google Authentication Successful!");
+        }
+      };
+  
+      window.addEventListener("message", handleMessage);
+  
+      // ✅ Polling method to detect when login window closes
+      const checkAuthInterval = setInterval(() => {
+        if (authWindow.closed) {
+          clearInterval(checkAuthInterval);
+          console.log("🔄 Checking authentication status...");
+          window.removeEventListener("message", handleMessage);
         }
       }, 1000);
-    
     } catch (error) {
       console.error("❌ Google Login Failed:", error);
       alert("❌ Failed to initiate Google Login.");
@@ -162,30 +124,18 @@ export default function TrustpilotScraper() {
   // ✅ Handle Upload to Google Drive
   const handleGoogleDriveUpload = async () => {
     try {
-      // First verify authentication
-      const authCheck = await axios.get('https://scraper-backend-fsrl.onrender.com/auth-status', {
-        withCredentials: true
-      });
-      
-      if (!authCheck.data.authenticated) {
-        setIsAuthenticated(false);
-        alert("❌ You need to log in with Google first.");
-        return;
-      }
-  
       // Create a blob from the download URL
       const fileResponse = await fetch(downloadUrl);
       const fileBlob = await fileResponse.blob();
   
       // Create FormData and append the file
       const formData = new FormData();
-      formData.append('file', fileBlob, 'trustpilot_reviews.xlsx');
+      formData.append('file', fileBlob, 'google_reviews.xlsx');
   
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google/upload",
         formData,
         {
-          withCredentials: true,
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -194,9 +144,10 @@ export default function TrustpilotScraper() {
       alert(response.data.message);
     } catch (error: any) {
       console.error("❌ Upload Failed:", error);
+  
       if (error.response?.status === 401) {
-        setIsAuthenticated(false);
         alert("❌ You need to log in with Google first.");
+        setIsAuthenticated(false);
       } else {
         alert("❌ Failed to upload file to Google Drive.");
       }
