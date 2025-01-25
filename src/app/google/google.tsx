@@ -41,37 +41,56 @@ export default function GoogleScraper() {
     try {
       const formData = new FormData();
       formData.append("business_name", businessName);
-      formData.append("address", address); 
+      formData.append("address", address);
       if (includeRatings) formData.append("include_ratings", includeRatings);
       if (keywords) formData.append("keywords", keywords);
 
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google",
         formData,
-        { 
-          headers: { "Content-Type": "multipart/form-data" }, 
+        {
+          headers: { "Content-Type": "multipart/form-data" },
           responseType: 'blob',
-          timeout: 240000, // Increased to 4 minutes
-          validateStatus: function (status) {
-            return status < 500;
-          }
+          timeout: 300000, // 5 minutes timeout
         }
       );
 
-      // Handle the response
-      if (response.headers['content-type']?.includes('application/json')) {
-        // It's an error response
-        const text = await response.data.text();
-        const error = JSON.parse(text);
-        setErrorMessage(error.error || "❌ No reviews found.");
-      } else {
-        // It's a file
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        setDownloadUrl(url);
+      // Check if the response is an error message
+      if (response.data.type === 'application/json') {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const error = JSON.parse(reader.result as string);
+          setErrorMessage(error.error || "❌ An error occurred");
+        };
+        reader.readAsText(response.data);
+        return;
       }
+
+      // Handle successful response
+      const contentDisposition = response.headers['content-disposition'];
+      const filename = contentDisposition
+        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+        : 'google_reviews.xlsx';
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      setDownloadUrl(url);
+
     } catch (error: any) {
       console.error("❌ API Request Failed:", error);
-      setErrorMessage(error.response?.data?.error || "❌ Something went wrong. Please try again.");
+      if (error.response?.data instanceof Blob) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const errorData = JSON.parse(reader.result as string);
+            setErrorMessage(errorData.error || "❌ Something went wrong");
+          } catch {
+            setErrorMessage("❌ Failed to process the response");
+          }
+        };
+        reader.readAsText(error.response.data);
+      } else {
+        setErrorMessage(error.message || "❌ Something went wrong");
+      }
     }
 
     setLoading(false);
