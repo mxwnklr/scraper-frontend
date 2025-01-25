@@ -217,32 +217,6 @@ export default function GoogleScraper() {
             />
           </div>
 
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Filter by Ratings (e.g., 1,2,3 or leave empty for all)" 
-              value={includeRatings} 
-              onChange={(e) => setIncludeRatings(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            />
-            <div className="text-gray-400 text-sm mt-1 ml-2">
-              Separate multiple ratings with commas (1-5)
-            </div>
-          </div>
-
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Filter by Keywords (e.g., great,bad,service)" 
-              value={keywords} 
-              onChange={(e) => setKeywords(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            />
-            <div className="text-gray-400 text-sm mt-1 ml-2">
-              Separate multiple keywords with commas
-            </div>
-          </div>
-
           <button 
             type="submit" 
             className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4" 
