@@ -38,12 +38,6 @@ export default function GoogleScraper() {
     setDownloadUrl("");
     setErrorMessage("");
 
-    if (!businessName || !address) {
-      setErrorMessage("❌ Business name and address are required.");
-      setLoading(false);
-      return;
-    }
-
     try {
       const formData = new FormData();
       formData.append("business_name", businessName);
@@ -51,31 +45,37 @@ export default function GoogleScraper() {
       if (includeRatings) formData.append("include_ratings", includeRatings);
       if (keywords) formData.append("keywords", keywords);
 
-      console.log("📡 Sending request to backend:", { businessName, address, includeRatings, keywords });
-
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob", timeout: 900000 }
+        { 
+          headers: { "Content-Type": "multipart/form-data" }, 
+          responseType: 'blob',
+          timeout: 240000, // Increased to 4 minutes
+          validateStatus: function (status) {
+            return status < 500;
+          }
+        }
       );
 
-      console.log("✅ API Response received:", response);
-
-      if (response.status === 404) {
-        setErrorMessage("❌ No matching reviews found.");
-        setLoading(false);
-        return;
+      // Handle the response
+      if (response.headers['content-type']?.includes('application/json')) {
+        // It's an error response
+        const text = await response.data.text();
+        const error = JSON.parse(text);
+        setErrorMessage(error.error || "❌ No reviews found.");
+      } else {
+        // It's a file
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        setDownloadUrl(url);
       }
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      setDownloadUrl(url);
     } catch (error: any) {
       console.error("❌ API Request Failed:", error);
-      setErrorMessage("❌ Something went wrong. Please try again.");
+      setErrorMessage(error.response?.data?.error || "❌ Something went wrong. Please try again.");
     }
 
     setLoading(false);
-  };
+};
 
   // ✅ Handle Google Login
   const handleGoogleLogin = async () => {
