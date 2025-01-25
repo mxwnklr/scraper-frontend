@@ -6,17 +6,15 @@ import { useRouter } from "next/navigation";
 export default function GoogleScraper() {
   const router = useRouter();
   
-  // ✅ State Variables (Now Includes Address)
+  // State Variables
   const [businessName, setBusinessName] = useState("");
   const [address, setAddress] = useState(""); 
-  const [includeRatings, setIncludeRatings] = useState("");
-  const [keywords, setKeywords] = useState("");
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ Track Google Login Status
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // ✅ Listen for OAuth Success Messages
+  // Listen for OAuth Success Messages
   useEffect(() => {
     const handleOAuthSuccess = (event: MessageEvent) => {
       if (event.origin === window.location.origin && event.data === "oauth_success") {
@@ -42,8 +40,6 @@ export default function GoogleScraper() {
       const formData = new FormData();
       formData.append("business_name", businessName);
       formData.append("address", address);
-      if (includeRatings) formData.append("include_ratings", includeRatings);
-      if (keywords) formData.append("keywords", keywords);
 
       const response = await axios.post(
         "https://scraper-backend-fsrl.onrender.com/google",
@@ -94,9 +90,9 @@ export default function GoogleScraper() {
     }
 
     setLoading(false);
-};
+  };
 
-  // ✅ Handle Google Login
+  // Handle Google Login
   const handleGoogleLogin = async () => {
     try {
       const page = "google";
@@ -146,7 +142,7 @@ export default function GoogleScraper() {
     }
   };
 
-  // ✅ Handle Upload to Google Drive
+  // Handle Upload to Google Drive
   const handleGoogleDriveUpload = async () => {
     try {
       // Create a blob from the download URL
