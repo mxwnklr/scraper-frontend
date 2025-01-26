@@ -29,11 +29,15 @@ export default function GoogleScraper() {
             }
         );
 
-        const { filename, review_count } = response.data;
-        setMessage(`✅ Found ${review_count} reviews.`);
+        const { filename, review_count, error } = response.data;
         
-        // Set download URL
-        setDownloadUrl(`https://scraper-backend-fsrl.onrender.com/download/${filename}`);
+        if (error) {
+            setMessage(`❌ ${error}`);
+        } else {
+            setMessage(`✅ Found ${review_count} reviews.`);
+            // Set download URL
+            setDownloadUrl(`https://scraper-backend-fsrl.onrender.com/download/${filename}`);
+        }
 
     } catch (error: any) {
         console.error("❌ API Request Failed:", error);
@@ -80,10 +84,16 @@ export default function GoogleScraper() {
         </form>
 
         {message && <div className="mt-4 p-4 text-center rounded-xl">{message}</div>}
-        {downloadUrl && (
-            <a href={downloadUrl} download className="download-button">
-                Download Excel File
+        {downloadUrl && !message.includes("❌") && (
+          <div className="mt-6 flex gap-4">
+            <a
+              href={downloadUrl}
+              download="google_reviews.xlsx"
+              className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+            >
+              ⬇️ Download Excel File
             </a>
+          </div>
         )}
       </div>
     </div>
