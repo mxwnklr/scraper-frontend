@@ -7,31 +7,37 @@ export default function GoogleScraper() {
   const [address, setAddress] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [downloadUrl, setDownloadUrl] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+    setDownloadUrl("");
 
     try {
-      const formData = new FormData();
-      formData.append("business_name", businessName);
-      formData.append("address", address);
+        const formData = new FormData();
+        formData.append("business_name", businessName);
+        formData.append("address", address);
 
-      const response = await axios.post(
-        "https://scraper-backend-fsrl.onrender.com/google",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          timeout: 300000, // 5 minutes timeout
-        }
-      );
+        const response = await axios.post(
+            "https://scraper-backend-fsrl.onrender.com/google",
+            formData,
+            {
+                headers: { "Content-Type": "multipart/form-data" },
+                timeout: 300000, // 5 minutes timeout
+            }
+        );
 
-      setMessage(response.data.message);
+        const { filename, review_count } = response.data;
+        setMessage(`✅ Found ${review_count} reviews.`);
+        
+        // Set download URL
+        setDownloadUrl(`https://scraper-backend-fsrl.onrender.com/download/${filename}`);
 
     } catch (error: any) {
-      console.error("❌ API Request Failed:", error);
-      setMessage(error.response?.data?.error || "❌ Something went wrong");
+        console.error("❌ API Request Failed:", error);
+        setMessage(error.response?.data?.error || "❌ Something went wrong");
     }
 
     setLoading(false);
@@ -74,6 +80,11 @@ export default function GoogleScraper() {
         </form>
 
         {message && <div className="mt-4 p-4 text-center rounded-xl">{message}</div>}
+        {downloadUrl && (
+            <a href={downloadUrl} download className="download-button">
+                Download Excel File
+            </a>
+        )}
       </div>
     </div>
   );
