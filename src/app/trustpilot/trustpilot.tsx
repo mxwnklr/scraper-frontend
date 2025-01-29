@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -11,23 +11,6 @@ export default function TrustpilotScraper() {
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    // ✅ Listen for OAuth success messages
-    const handleOAuthSuccess = (event: MessageEvent) => {
-      if (event.origin === window.location.origin && event.data === "oauth_success") {
-        alert("✅ Google Authentication Successful!");
-        setIsAuthenticated(true);
-      }
-    };
-
-    window.addEventListener("message", handleOAuthSuccess);
-
-    return () => {
-      window.removeEventListener("message", handleOAuthSuccess);
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,77 +64,6 @@ export default function TrustpilotScraper() {
     }
 
     setLoading(false);
-  };
-
-  // ✅ Handle Google Login
-  const handleGoogleLogin = async () => {
-    try {
-      const page = "google";
-      const response = await axios.get(`https://scraper-backend-fsrl.onrender.com/google-login?page=${page}`);
-      
-      // ✅ Open Google Login in a new tab
-      const authWindow = window.open(response.data.auth_url, "_blank", "width=500,height=600");
-  
-      if (!authWindow) {
-        alert("❌ Popup blocked! Please allow popups and try again.");
-        return;
-      }
-  
-      // ✅ Listen for OAuth success message
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin === window.location.origin && event.data === "oauth_success") {
-          setIsAuthenticated(true);
-          alert("✅ Google Authentication Successful!");
-        }
-      };
-  
-      window.addEventListener("message", handleMessage);
-  
-      // ✅ Polling method to detect when login window closes
-      const checkAuthInterval = setInterval(() => {
-        if (authWindow.closed) {
-          clearInterval(checkAuthInterval);
-          console.log("🔄 Checking authentication status...");
-          window.removeEventListener("message", handleMessage);
-        }
-      }, 1000);
-    } catch (error) {
-      console.error("❌ Google Login Failed:", error);
-      alert("❌ Failed to initiate Google Login.");
-    }
-  };
-
-  // ✅ Handle Upload to Google Drive
-  const handleGoogleDriveUpload = async () => {
-    try {
-      // Create a blob from the download URL
-      const fileResponse = await fetch(downloadUrl);
-      const fileBlob = await fileResponse.blob();
-  
-      // Create FormData and append the file
-      const formData = new FormData();
-      formData.append('file', fileBlob, 'google_reviews.xlsx');
-  
-      const response = await axios.post(
-        "https://scraper-backend-fsrl.onrender.com/google/upload",
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      alert(response.data.message);
-    } catch (error: any) {
-      console.error("❌ Upload Failed:", error);
-  
-      if (error.response?.status === 401) {
-        alert("❌ You need to log in with Google first.");
-        setIsAuthenticated(false);
-      } else {
-        alert("❌ Failed to upload file to Google Drive.");
-      }
-    }
   };
 
   return (
@@ -226,20 +138,10 @@ export default function TrustpilotScraper() {
             <a
               href={downloadUrl}
               download="trustpilot_reviews.xlsx"
-              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+              className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
               ⬇️ Download
             </a>
-
-            {!isAuthenticated ? (
-              <button className="w-1/2 p-4 bg-yellow-600 rounded-xl font-bold hover:bg-yellow-500 transition text-white" onClick={handleGoogleLogin}>
-                🔑 Google Login
-              </button>
-            ) : (
-              <button className="w-1/2 p-4 bg-green-600 rounded-xl font-bold hover:bg-green-500 transition text-white" onClick={handleGoogleDriveUpload}>
-                ⬆️ Google Drive
-              </button>
-            )}
           </div>
         )}
       </div>
