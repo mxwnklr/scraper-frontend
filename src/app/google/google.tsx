@@ -33,15 +33,13 @@ export default function GoogleScraper() {
 
         console.log("✅ API Response received:", response);
 
-        if (response.status === 404) {
+        if (response.status === 200) {
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            setDownloadUrl(url);
+        } else {
             console.warn("⚠️ No reviews found.");
             setErrorMessage("❌ No reviews found.");
-            setLoading(false);
-            return;
         }
-
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        setDownloadUrl(url);
     } catch (error: any) {
         console.error("❌ API Request Failed:", error);
 
