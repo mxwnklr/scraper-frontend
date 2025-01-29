@@ -36,7 +36,7 @@ export default function GoogleScraper() {
         } else {
             setMessage(`✅ Found ${review_count} reviews.`);
             // Set download URL
-            setDownloadUrl(`https://scraper-backend-fsrl.onrender.com/download/${filename}`);
+            setDownloadUrl(`https://scraper-backend-fsrl.onrender.com/${filename}`);
         }
 
     } catch (error: any) {
