@@ -31,11 +31,11 @@ export default function GoogleScraper() {
 
         const { filename, review_count, error } = response.data;
         
-        if (error) {
-            setMessage(`❌ ${error}`);
+        if (error || !review_count) {
+            setMessage(`❌ ${error || "No reviews found."}`);
         } else {
             setMessage(`✅ Found ${review_count} reviews.`);
-            // Set download URL
+            // Set download URL using the correct path
             setDownloadUrl(`https://scraper-backend-fsrl.onrender.com/${filename}`);
         }
 
