@@ -6,42 +6,50 @@ export default function GoogleScraper() {
   const [businessName, setBusinessName] = useState("");
   const [address, setAddress] = useState(""); 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
   const [downloadUrl, setDownloadUrl] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
     setDownloadUrl("");
+    setErrorMessage("");
 
     try {
         const formData = new FormData();
         formData.append("business_name", businessName);
         formData.append("address", address);
 
+        console.log("📡 Sending request to backend:", {
+          business_name: businessName,
+          address,
+        });
+
         const response = await axios.post(
             "https://scraper-backend-fsrl.onrender.com/google",
             formData,
-            {
-                headers: { "Content-Type": "multipart/form-data" },
-                timeout: 300000, // 5 minutes timeout
-            }
+            { headers: { "Content-Type": "multipart/form-data" }, responseType: "blob" }
         );
 
-        const { filename, review_count, error } = response.data;
-        
-        if (error || !review_count) {
-            setMessage(`❌ ${error || "No reviews found."}`);
-        } else {
-            setMessage(`✅ Found ${review_count} reviews.`);
-            // Set download URL using the correct path
-            setDownloadUrl(`https://scraper-backend-fsrl.onrender.com/${filename}`);
+        console.log("✅ API Response received:", response);
+
+        if (response.status === 404) {
+            console.warn("⚠️ No reviews found.");
+            setErrorMessage("❌ No reviews found.");
+            setLoading(false);
+            return;
         }
 
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        setDownloadUrl(url);
     } catch (error: any) {
         console.error("❌ API Request Failed:", error);
-        setMessage(error.response?.data?.error || "❌ Something went wrong");
+
+        if (error.response?.status === 404) {
+            setErrorMessage("❌ No reviews found.");
+        } else {
+            setErrorMessage("❌ Something went wrong. Please try again.");
+        }
     }
 
     setLoading(false);
@@ -83,15 +91,20 @@ export default function GoogleScraper() {
           </button>
         </form>
 
-        {message && <div className="mt-4 p-4 text-center rounded-xl">{message}</div>}
-        {downloadUrl && !message.includes("❌") && (
+        {errorMessage && (
+          <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
+            {errorMessage}
+          </div>
+        )}
+
+        {downloadUrl && !errorMessage && (
           <div className="mt-6 flex gap-4">
             <a
               href={downloadUrl}
               download="google_reviews.xlsx"
               className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
-              ⬇️ Download Excel File
+              ⬇️ Download
             </a>
           </div>
         )}
