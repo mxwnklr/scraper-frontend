@@ -2,7 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-export default function OpenAIInteraction() {
+export default function OpenAIInteraction({ outputFile }: { outputFile: string }) {  // Accept outputFile as a prop
   const [userPrompt, setUserPrompt] = useState("");
   const [openAIResponse, setOpenAIResponse] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,6 +12,7 @@ export default function OpenAIInteraction() {
     try {
       const response = await axios.post("/api/openai", {
         userPrompt,
+        outputFile,  // Include outputFile in the request
       });
       setOpenAIResponse(response.data.message);
     } catch (error) {

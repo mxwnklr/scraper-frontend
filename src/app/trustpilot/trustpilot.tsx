@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import OpenAIInteraction from "../openai/OpenAIInteraction";  // Import the AI interaction component
 
 export default function TrustpilotScraper() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function TrustpilotScraper() {
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showAIInteraction, setShowAIInteraction] = useState(false);  // State to toggle AI interaction
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,87 +71,95 @@ export default function TrustpilotScraper() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
       <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700 relative">
-        {/* Header */}
-        <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
-          {/* Back Button */}
-          <button
-            onClick={() => router.push("/")}
-            className="bg-gray-700 hover:bg-gray-600 text-white text-lg font-bold py-2 px-4 rounded-xl flex items-center"
-          >
-            Back
-          </button>
+        {!showAIInteraction ? (  // Conditionally render the form or AI interaction
+          <>
+            {/* Header */}
+            <h2 className="text-2xl font-bold text-center mb-6 flex items-center justify-start gap-x-4">
+              {/* Back Button */}
+              <button
+                onClick={() => router.push("/")}
+                className="bg-gray-700 hover:bg-gray-600 text-white text-lg font-bold py-2 px-4 rounded-xl flex items-center"
+              >
+                Back
+              </button>
 
-          <div className="flex items-center gap-x-2">
-            <span>🔍</span>
-            <span>Scrape Trustpilot Reviews</span>
-          </div>
-        </h2>
+              <div className="flex items-center gap-x-2">
+                <span>🔍</span>
+                <span>Scrape Trustpilot Reviews</span>
+              </div>
+            </h2>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Company URL"
-              value={companyUrl}
-              onChange={(e) => setCompanyUrl(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Company URL"
+                  value={companyUrl}
+                  onChange={(e) => setCompanyUrl(e.target.value)}
+                  className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
 
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Keywords (Optional)"
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Keywords (Optional)"
+                  value={keywords}
+                  onChange={(e) => setKeywords(e.target.value)}
+                  className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Include Ratings (Optional)"
-              value={includeRatings}
-              onChange={(e) => setIncludeRatings(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Include Ratings (Optional)"
+                  value={includeRatings}
+                  onChange={(e) => setIncludeRatings(e.target.value)}
+                  className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-          <button
-            type="submit"
-            className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4"
-            disabled={loading}
-          >
-            {loading ? "Scraping..." : "Start Scraping"}
-          </button>
-        </form>
+              <button
+                type="submit"
+                className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4"
+                disabled={loading}
+              >
+                {loading ? "Scraping..." : "Start Scraping"}
+              </button>
+            </form>
 
-        {errorMessage && (
-          <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
-            {errorMessage}
-          </div>
-        )}
+            {errorMessage && (
+              <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
+                {errorMessage}
+              </div>
+            )}
 
-        {downloadUrl && !errorMessage && (
-          <div className="mt-6 flex gap-4">
-            <a
-              href={downloadUrl}
-              download="trustpilot_reviews.xlsx"
-              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
-            >
-              ⬇️ Download
-            </a>
-            <button
-              onClick={() => router.push(`/openai?outputFile=trustpilot_reviews.xlsx`)}  // Include output file in query
-              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
-            >
-              🤖 Interact with AI
-            </button>
-          </div>
-        )}
+            {downloadUrl && !errorMessage && (
+              <div className="mt-6 flex gap-4">
+                <a
+                  href={downloadUrl}
+                  download="trustpilot_reviews.xlsx"
+                  className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+                >
+                  ⬇️ Download
+                </a>
+                <button
+                  onClick={() => setShowAIInteraction(true)}  // Toggle to show AI interaction
+                  className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+                >
+                  🤖 Interact with AI
+                </button>
+              </div>
+            )}
+
+            {showAIInteraction && (
+              <OpenAIInteraction outputFile="trustpilot_reviews.xlsx" />  // Pass outputFile as a prop
+            )}
+          </>
+        ) : null}
       </div>
     </div>
   );

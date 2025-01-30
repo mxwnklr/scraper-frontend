@@ -1,15 +1,15 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";  // ✅ Correct in Next.js App Router
+import OpenAIInteraction from "../openai/OpenAIInteraction";  // Import the AI interaction component
 
 export default function GoogleScraper() {
-  const router = useRouter();  // Initialize router using useRouter
   const [businessName, setBusinessName] = useState("");
   const [address, setAddress] = useState(""); 
   const [loading, setLoading] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showAIInteraction, setShowAIInteraction] = useState(false);  // State to toggle AI interaction
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,62 +58,71 @@ export default function GoogleScraper() {
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
       <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700">
-        <h2 className="text-2xl font-bold text-center mb-6">Scrape Google Reviews</h2>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Business Name" 
-              value={businessName} 
-              onChange={(e) => setBusinessName(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              required 
-            />
-          </div>
+        {!showAIInteraction ? (  // Conditionally render the form or AI interaction
+          <>
+            <h2 className="text-2xl font-bold text-center mb-6">Scrape Google Reviews</h2>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="Business Name" 
+                  value={businessName} 
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                  required 
+                />
+              </div>
 
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Business Address" 
-              value={address} 
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              required 
-            />
-          </div>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="Business Address" 
+                  value={address} 
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full p-4 pr-12 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                  required 
+                />
+              </div>
 
-          <button 
-            type="submit" 
-            className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4" 
-            disabled={loading}
-          >
-            {loading ? "Scraping..." : "Start Scraping"}
-          </button>
-        </form>
+              <button 
+                type="submit" 
+                className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4" 
+                disabled={loading}
+              >
+                {loading ? "Scraping..." : "Start Scraping"}
+              </button>
+            </form>
 
-        {errorMessage && (
-          <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
-            {errorMessage}
-          </div>
-        )}
+            {errorMessage && (
+              <div className="mt-4 p-4 text-red-500 text-center rounded-xl">
+                {errorMessage}
+              </div>
+            )}
 
-        {downloadUrl && !errorMessage && (
-          <div className="mt-6 flex gap-4">
-            <a
-              href={downloadUrl}
-              download="google_reviews.xlsx"
-              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
-            >
-              ⬇️ Download
-            </a>
-            <button
-              onClick={() => router.push(`/openai?outputFile=google_reviews.xlsx`)}  // Include output file in query
-              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
-            >
-              🤖 Interact with AI
-            </button>
-          </div>
-        )}
+            {downloadUrl && !errorMessage && (
+              <div className="mt-6 flex gap-4">
+                <a
+                  href={downloadUrl}
+                  download="google_reviews.xlsx"
+                  className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+                >
+                  ⬇️ Download
+                </a>
+                <button
+                  onClick={() => setShowAIInteraction(true)}  // Toggle to show AI interaction
+                  className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+                >
+                  🤖 Interact with AI
+                </button>
+              </div>
+            )}
+
+            {showAIInteraction && (
+              <OpenAIInteraction outputFile="google_reviews.xlsx" />  // Pass outputFile as a prop
+            )}
+
+          </>
+        ) : null}
       </div>
     </div>
   );
