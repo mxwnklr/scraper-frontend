@@ -1,8 +1,10 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/router";  // Import useRouter from next/router
 
 export default function GoogleScraper() {
+  const router = useRouter();  // Initialize router using useRouter
   const [businessName, setBusinessName] = useState("");
   const [address, setAddress] = useState(""); 
   const [loading, setLoading] = useState(false);
@@ -100,10 +102,16 @@ export default function GoogleScraper() {
             <a
               href={downloadUrl}
               download="google_reviews.xlsx"
-              className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
               ⬇️ Download
             </a>
+            <button
+              onClick={() => router.push(`/openai?outputFile=google_reviews.xlsx`)}
+              className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+            >
+              🤖 Interact with AI
+            </button>
           </div>
         )}
       </div>
