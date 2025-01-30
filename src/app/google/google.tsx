@@ -107,7 +107,7 @@ export default function GoogleScraper() {
               ⬇️ Download
             </a>
             <button
-              onClick={() => router.push(`/openai?outputFile=google_reviews.xlsx`)}
+              onClick={() => router.push(`/openai?outputFile=google_reviews.xlsx`)}  // Include output file in query
               className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
             >
               🤖 Interact with AI
