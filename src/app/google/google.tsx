@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/router";  // Directly import useRouter from next/router
+import { useRouter } from "next/navigation";  // ✅ Correct in Next.js App Router
 
 export default function GoogleScraper() {
   const router = useRouter();  // Initialize router using useRouter
