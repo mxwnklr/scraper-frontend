@@ -2,7 +2,6 @@
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import OpenAIInteraction from "../openai/OpenAIInteraction";  // Import the AI interaction component
 
 export default function TrustpilotScraper() {
   const router = useRouter();
@@ -13,6 +12,8 @@ export default function TrustpilotScraper() {
   const [downloadUrl, setDownloadUrl] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showAIInteraction, setShowAIInteraction] = useState(false);  // State to toggle AI interaction
+  const [userPrompt, setUserPrompt] = useState("");  // State for user prompt
+  const [openAIResponse, setOpenAIResponse] = useState("");  // State for OpenAI response
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,9 +69,23 @@ export default function TrustpilotScraper() {
     setLoading(false);
   };
 
+  const handleOpenAIRequest = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post("/api/openai", {
+        userPrompt,
+        outputFile: "trustpilot_reviews.xlsx",  // Include outputFile in the request
+      });
+      setOpenAIResponse(response.data.message);
+    } catch (error) {
+      console.error("Error fetching OpenAI response:", error);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#0d0d0d] text-white">
-      <div className="w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700 relative">
+      <div className={`w-full min-w-[600px] max-w-[750px] p-10 bg-[#1a1a1a] rounded-2xl shadow-lg border border-gray-700 relative ${showAIInteraction ? 'expanded' : ''}`}>
         {!showAIInteraction ? (  // Conditionally render the form or AI interaction
           <>
             {/* Header */}
@@ -142,7 +157,7 @@ export default function TrustpilotScraper() {
                 <a
                   href={downloadUrl}
                   download="trustpilot_reviews.xlsx"
-                  className="w-1/2 block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
+                  className="w-full block p-4 bg-gray-700 rounded-xl font-bold text-center hover:bg-gray-600 transition"
                 >
                   ⬇️ Download
                 </a>
@@ -154,12 +169,30 @@ export default function TrustpilotScraper() {
                 </button>
               </div>
             )}
-
-            {showAIInteraction && (
-              <OpenAIInteraction outputFile="trustpilot_reviews.xlsx" />  // Pass outputFile as a prop
+          </>
+        ) : (
+          <>
+            <textarea
+              placeholder="Enter your prompt here..."
+              value={userPrompt}
+              onChange={(e) => setUserPrompt(e.target.value)}
+              className="w-full p-4 bg-[#262626] text-white rounded-xl border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4"
+            />
+            <button
+              onClick={handleOpenAIRequest}
+              className="w-full p-4 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition text-white mt-4"
+              disabled={loading}
+            >
+              {loading ? "Processing..." : "Send to AI"}
+            </button>
+            {openAIResponse && (
+              <div className="mt-4 p-4 bg-gray-700 rounded-xl">
+                <h3 className="font-bold">OpenAI Response:</h3>
+                <p>{openAIResponse}</p>
+              </div>
             )}
           </>
-        ) : null}
+        )}
       </div>
     </div>
   );
